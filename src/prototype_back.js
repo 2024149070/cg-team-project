@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-import { floors, obstacles, goal, pillarPositions, pillars, ice, steps, bigwalls, smallfloors } from './map.js';
+import { floors, obstacles, goal, pillarPositions, pillars, steps, bigwalls, smallfloors } from './map.js';
 
 // --- 전역 변수 설정 ---
 const scene = new THREE.Scene();
@@ -105,7 +105,7 @@ scene.add(goal);
 const gltfLoader = new GLTFLoader();
 
 gltfLoader.load(
-    './apartment.glb',
+    './assets/apartment.glb',
     (gltf) => {
         const template = gltf.scene;
         template.scale.set(1, 1, 1);
@@ -457,6 +457,7 @@ function updatePhysics() {
     const ANGLE_CENTER = Math.PI / 2;
     const ANGLE_LEFT = Math.PI * 3 / 4;
     const ANGLE_RIGHT = Math.PI / 4;
+    let playerBottomY;
 
     let targetRotation = ANGLE_CENTER;
 
@@ -538,7 +539,7 @@ function updatePhysics() {
     }
 
     if (!isGrounded) { 
-        const playerBottomY = character.position.y - 0.5;
+        playerBottomY = character.position.y - 0.5;
         const playerX = character.position.x;
         const playerZ = character.position.z;
 
@@ -565,7 +566,7 @@ function updatePhysics() {
             }
         }
     }
-
+    playerBottomY = character.position.y - playerRadius;
     ///// 발판 색 바꾸기 /////
     let allPressed = (steps.length > 0);
     steps.forEach(step => {
@@ -578,11 +579,11 @@ function updatePhysics() {
 
         // x 범위 안?
         const onX =
-        sphere.position.x >= min.x - playerRadius &&
-        sphere.position.x <= max.x + playerRadius;
+        character.position.x >= min.x - playerRadius &&
+        character.position.x <= max.x + playerRadius;
 
         // z 범위 안?
-        let onZ = isOrtho ? true : (sphere.position.z >= min.z && sphere.position.z <= max.z);
+        let onZ = isOrtho ? true : (character.position.z >= min.z && character.position.z <= max.z);
 
         const onStep = onX && onY && onZ;
 

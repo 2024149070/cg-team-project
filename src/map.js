@@ -3,7 +3,7 @@ import * as THREE from 'https://unpkg.com/three@0.159.0/build/three.module.js';
 const floorPositions = [
     { x: 4, y: 0, z: 0 }, { x: 8, y: 0, z: 0 }, { x: 12, y: 0, z: 0 },
     { x: 16, y: 0, z: 0 }, { x: 20, y: 0, z: 0 }, { x: 24, y: 0, z: 0 },
-    { x: 28, y: 0, z: 0 }, { x: 32, y: 0, z: -20 }, { x: 36, y: 0, z: -20 },
+    { x: 28, y: 0, z: 0 }, { x: 32, y: 0, z: 0 }, { x: 36, y: 0, z: 0 },
     { x: 40, y: 0, z: 0 }, { x: 44, y: 0, z: 0 }, { x: 48, y: 0, z: 0 },
     { x: 52, y: 0, z: 0 }, { x: 56, y: 0, z: 0 }, { x: 60, y: 0, z: 0 },
     { x: 64, y: 0, z: 0 }, { x: 68, y: 0, z: 0 }, { x: 72, y: 0, z: 0 },
@@ -42,28 +42,11 @@ smallFloorPositions.forEach(pos => {
     //scene.add(floor);
     smallfloors.push(smallfloor);
 });
-//////////
-
-
-///// 빙판길 추가 /////
-const iceGeometry = new THREE.BoxGeometry(3.5, 0.2, 1.5);
-const iceMeterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
-const ice = new THREE.Mesh(iceGeometry, iceMeterial);
-
-ice.position.set(28, 0.2, 0);
-ice.userData.originalZ = ice.position.z;
-ice.userData.isIce = true;
-ice.geometry.computeBoundingBox();
-ice.bbox = new THREE.Box3().setFromObject(ice);
-
-floors.push(ice);
-///////////////////
-
 
 const obstacles = [];
 
 const pillarPositions = [
-    { x: 6, y: 2.5, z: -3 }, { x: 10, y: 2.5, z: 2 }
+    { x: 6, y: 4, z: -3 }, { x: 10, y: 4, z: 2 }
 ];
 
 // const pillarGeometry = new THREE.BoxGeometry(1, 5, 1);
@@ -153,4 +136,4 @@ const goal = new THREE.Mesh(goalGeometry, goalMaterial);
 goal.position.set(80, 0.7, 0);
 //scene.add(goal);
 
-export { floors, pillars, walls, obstacles, goal, ice, pillarPositions, steps, bigwalls, smallfloors };
+export { floors, pillars, walls, obstacles, goal, pillarPositions, steps, bigwalls, smallfloors };
