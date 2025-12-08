@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-import { floors, obstacles, goal } from './map.js';
+import { floors, obstacles, goal, pillarPositions, pillars, ice, steps, bigwalls, smallfloors } from './map.js';
 
 // --- 전역 변수 설정 ---
 const scene = new THREE.Scene();
@@ -99,6 +99,41 @@ let isGrounded = true;
 floors.forEach(floor => { scene.add(floor); });
 obstacles.forEach(obstacle => { scene.add(obstacle); });
 scene.add(goal);
+
+
+///// 아파트 추가 /////
+const gltfLoader = new GLTFLoader();
+
+gltfLoader.load(
+    './apartment.glb',
+    (gltf) => {
+        const template = gltf.scene;
+        template.scale.set(1, 1, 1);
+
+        template.traverse((obj) => {
+            if (obj.isMesh) {
+                obj.castShadow = true;
+                obj.receiveShadow = true;
+            }
+        });
+
+        pillarPositions.forEach((pos) => {
+            const apartment = template.clone(true);
+
+            apartment.position.set(pos.x, pos.y, pos.z);
+            apartment.userData.originalZ = apartment.position.z;
+            apartment.bbox = new THREE.Box3().setFromObject(apartment);
+
+            scene.add(apartment);
+            pillars.push(apartment);
+            obstacles.push(apartment);
+        });
+    },
+    undefined,
+    (err) => {
+        console.error('apartment.glb 로드 실패: ', err);
+    }
+);
 
 
 // =========================================================
@@ -530,7 +565,74 @@ function updatePhysics() {
             }
         }
     }
+
+    ///// 발판 색 바꾸기 /////
+    let allPressed = (steps.length > 0);
+    steps.forEach(step => {
+        const box = step.bbox;
+        const min = box.min;
+        const max = box.max;
+
+        // 발판(y) 위?
+        const onY = Math.abs(playerBottomY - max.y) < 0.06;
+
+        // x 범위 안?
+        const onX =
+        sphere.position.x >= min.x - playerRadius &&
+        sphere.position.x <= max.x + playerRadius;
+
+        // z 범위 안?
+        let onZ = isOrtho ? true : (sphere.position.z >= min.z && sphere.position.z <= max.z);
+
+        const onStep = onX && onY && onZ;
+
+        if (onStep) {
+            step.material.color.set(0x7CFC00);
+        }
+        else {
+            step.material.color.copy(step.userData.originalColor);
+        }
+
+        if (!onStep) {
+            allPressed = false;
+        }
+    });
+
+    ///// 발판 밟으면 bigWall 위로 이동 /////
+    const TARGET_WALL_INDEX = 0;
+    if (allPressed && bigwalls.length > TARGET_WALL_INDEX) {
+        const targetWall = bigwalls[TARGET_WALL_INDEX];
+        if (!targetWall.userData.raised) {
+            targetWall.position.y += 1.8;
+            targetWall.userData.raised = true;
+
+            targetWall.updateMatrixWorld();
+            targetWall.geometry.computeBoundingBox();
+            targetWall.bbox = new THREE.Box3().setFromObject(targetWall);
+
+            // bigWall 이동과 함께 작은 바닥 등장 (y좌표 이동)
+            const smallFloorConfigs = [
+                { index: 0, y: 0}, { index: 1, y: 1.5}, { index: 2, y: 0},
+            ];
+
+            smallFloorConfigs.forEach(cfg => {
+                const sf = smallfloors[cfg.index];
+                if (sf && !sf.userData.activated) {
+                    sf.position.y = cfg.y;
+                    sf.userData.activated = true;
+
+                    scene.add(sf);
+                    floors.push(sf);
+
+                    sf.updateMatrixWorld();
+                    sf.geometry.computeBoundingBox();
+                    sf.bbox = new THREE.Box3().setFromObject(sf);
+                }
+            });
+        }
+    }
     
+
     if (character.position.y < -10) {
         isGameOver = true;
         gameOverReason = "발을 헛디뎠습니다!";
