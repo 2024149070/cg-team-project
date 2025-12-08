@@ -2,9 +2,12 @@ import * as THREE from 'https://unpkg.com/three@0.159.0/build/three.module.js';
 
 const floorPositions = [
     { x: 4, y: 0, z: 0 }, { x: 8, y: 0, z: 0 }, { x: 12, y: 0, z: 0 },
-    { x: 16, y: 0, z: 0 }, { x: 20, y: 0, z: 0 }, { x: 24, y: 0, z: -20 },
-    { x: 28, y: 0, z: 0 }, { x: 33.5, y: 0, z: 0 }, { x: 37.5, y: 0, z: 0 },
-    { x: 41.5, y: 0, z: 0 }
+    { x: 16, y: 0, z: 0 }, { x: 20, y: 0, z: 0 }, { x: 24, y: 0, z: 0 },
+    { x: 28, y: 0, z: 0 }, { x: 32, y: 0, z: -20 }, { x: 36, y: 0, z: -20 },
+    { x: 40, y: 0, z: 0 }, { x: 44, y: 0, z: 0 }, { x: 48, y: 0, z: 0 },
+    { x: 52, y: 0, z: 0 }, { x: 56, y: 0, z: 0 }, { x: 60, y: 0, z: 0 },
+    { x: 64, y: 0, z: 0 }, { x: 68, y: 0, z: 0 }, { x: 72, y: 0, z: 0 },
+    { x: 76, y: 0, z: 0 }, { x: 80, y: 0, z: 0 }, { x: 84, y: 0, z: 0 }
 ];
 
 const floorGeometry = new THREE.BoxGeometry(4, 0.5, 10);
@@ -43,7 +46,7 @@ pillarPositions.forEach(pos => {
 });
 
 const wallPositions = [
-    { x: 14, y: 1, z: 0 }
+    { x: 65, y: 1, z: 0 }
 ];
 
 const wallGeometry = new THREE.BoxGeometry(1, 1.5, 10); 
@@ -64,7 +67,7 @@ wallPositions.forEach(pos => {
 const goalGeometry = new THREE.IcosahedronGeometry(0.5, 0);
 const goalMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
 const goal = new THREE.Mesh(goalGeometry, goalMaterial);
-goal.position.set(40, 0.7, 0);
+goal.position.set(80, 0.7, 0);
 //scene.add(goal);
 
 export { floors, pillars, walls, obstacles, goal };
