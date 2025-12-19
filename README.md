@@ -3,6 +3,8 @@
 ## 🔗 배포 링크
 [Play Game](https://2024149070.github.io/cg-team-project/prototype_back.html)
 
+[JH](https://2024149070.github.io/cg-team-project/JH/index.html)
+
 <br>
 
 ## 🚀 workFlow
