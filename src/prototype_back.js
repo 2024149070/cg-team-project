@@ -765,6 +765,13 @@ function resetGame() {
 
     character.position.set(4, 1.5, 0);
     velocity.set(0.03, 0, 0);
+    
+    //이동키 초기화, 캐릭터 방향 초기화
+    Object.keys(keys).forEach(key => { 
+        keys[key] = false;
+    });
+    character.rotation.y = Math.PI/2
+
 }
 
 init();
