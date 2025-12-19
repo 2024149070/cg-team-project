@@ -98,7 +98,7 @@ export class Game {
             this.weatherSystem.init(this.assetManager);
 
             // Load Character
-            const charGltf = await this.assetManager.loadGLTF('../assets/Character.glb');
+            const charGltf = await this.assetManager.loadGLTF('./assets/Character.glb');
             this.player.setMesh(charGltf.scene);
 
             // Load Apartment
@@ -117,7 +117,7 @@ export class Game {
     }
 
     loadApartments() {
-        this.assetManager.loadGLTF('../assets/apartment.glb').then(gltf => {
+        this.assetManager.loadGLTF('./assets/apartment.glb').then(gltf => {
             const template = gltf.scene;
             template.scale.set(1, 1, 1);
             template.traverse((obj) => {
@@ -127,9 +127,15 @@ export class Game {
                 }
             });
 
+            // Calculate offset to place on floor (y=0.25)
+            const box = new THREE.Box3().setFromObject(template);
+            const bottomOffset = -box.min.y; // Offset to bring bottom to 0 local
+
             pillarPositions.forEach((pos) => {
                 const apartment = template.clone(true);
-                apartment.position.set(pos.x, pos.y, pos.z);
+                // Place on floor: y = 0.25 (floor top) + bottomOffset
+                // We ignore pos.y (which was 4) to ensure it touches the floor
+                apartment.position.set(pos.x, 0.25 + bottomOffset, pos.z);
                 apartment.userData.originalZ = apartment.position.z;
                 apartment.bbox = new THREE.Box3().setFromObject(apartment);
                 this.scene.add(apartment);
@@ -224,4 +230,3 @@ export class Game {
         this.player.isGrounded = true;
     }
 }
-
