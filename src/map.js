@@ -108,7 +108,7 @@ bigWallPositions.forEach(pos => {
 
 ///// 밟는 발판 추가 /////
 const stepPositions = [
-    { x: 33, y: 0.2, z: -2 }, { x: 34, y: 0.2, z: 3}
+    { x: 33, y: 0.2, z: -2 }, { x: 34.5, y: 0.2, z: 3}
 ]
 
 const stepGeometry = new THREE.BoxGeometry(1, 0.2, 1);
@@ -135,5 +135,6 @@ const goalMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
 const goal = new THREE.Mesh(goalGeometry, goalMaterial);
 goal.position.set(80, 0.7, 0);
 //scene.add(goal);
+
 
 export { floors, pillars, walls, obstacles, goal, pillarPositions, steps, bigwalls, smallfloors };
