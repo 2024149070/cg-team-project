@@ -3,7 +3,7 @@ import * as THREE from 'https://unpkg.com/three@0.159.0/build/three.module.js';
 
 export async function loadTrafficLight(loader) {
     // 1. 비동기로 로드
-    const gltf = await loader.loadAsync('./assets/traffic_light.glb');
+    const gltf = await loader.loadAsync('./assets/trafficlight2.glb');
     const model = gltf.scene;
 
     // 2. 모델 기본 설정 (회전, 크기 등 모델 고유의 특성)
@@ -36,8 +36,4 @@ export async function loadTrafficLight(loader) {
 
 // const trafficLight = await loadTrafficLight(loader);
 // trafficLight.position.set(8, 0.5, 0);
-
-//-------------------------------
-// main.js
-
-//scene.add(trafficLight);
+// scene.add(trafficLight);

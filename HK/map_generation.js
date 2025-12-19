@@ -8,8 +8,6 @@ export async function initMap(loader, scene, obstacles, floors,collisionObjects)
     console.log("맵 생성 시작");
 
     await traffic_light_zone(scene, loader, {x:20,y:0,z:0}, collisionObjects);
-
-    // 3. 씬과 충돌 배열에 추가합니다.
     
     await createFloors(loader, scene, floorPositions, floors)
 
@@ -44,8 +42,6 @@ async function loadFloor(loader) {
     }
     
     });
-    // floorGeometry = new THREE.BoxGeometry(4, 0.5, 10);
-    // floorMaterial = new THREE.MeshLambertMaterial({ color: 0x964b00 });
     return [floorGeometry, floorMaterial];
 }
 

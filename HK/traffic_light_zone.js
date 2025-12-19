@@ -4,7 +4,7 @@ import { loadTrafficLight } from './traffic_light.js';
 export async function traffic_light_zone(scene, loader, position,  collisionObjects, isDebugging = false){
     
     // traffic_light_zone에서의 상대적 위치 traffic_light
-    const traffic_light_pos = new THREE.Vector3(3,4,0)
+    const traffic_light_pos = new THREE.Vector3(3,0,0)
 
     
     const zoneGeometry = new THREE.BoxGeometry(4, 10, 10);
