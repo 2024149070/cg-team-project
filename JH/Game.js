@@ -98,7 +98,7 @@ export class Game {
             this.weatherSystem.init(this.assetManager);
 
             // Load Character
-            const charGltf = await this.assetManager.loadGLTF('./assets/Character.glb');
+            const charGltf = await this.assetManager.loadGLTF('../assets/Character.glb');
             this.player.setMesh(charGltf.scene);
 
             // Load Apartment
@@ -117,7 +117,7 @@ export class Game {
     }
 
     loadApartments() {
-        this.assetManager.loadGLTF('./assets/apartment.glb').then(gltf => {
+        this.assetManager.loadGLTF('../assets/apartment.glb').then(gltf => {
             const template = gltf.scene;
             template.scale.set(1, 1, 1);
             template.traverse((obj) => {
@@ -228,5 +228,15 @@ export class Game {
         this.player.momentumX = 0;
         this.player.momentumZ = 0;
         this.player.isGrounded = true;
+
+        // Reset Bigwalls
+        bigwalls.forEach(wall => {
+            if (wall.userData.raised) {
+                wall.position.y -= 1.8;
+                wall.userData.raised = false;
+                wall.updateMatrixWorld();
+                wall.bbox.setFromObject(wall);
+            }
+        });
     }
 }
