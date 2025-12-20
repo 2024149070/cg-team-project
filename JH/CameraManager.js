@@ -81,8 +81,8 @@ export class CameraManager {
             let ratio = this.isOrtho ? (1 - t) : t;
 
             const sideX = characterPosition.x + CONFIG.CAMERA.VIEW.SIDE.offsetX;
-            const sideY = CONFIG.CAMERA.VIEW.SIDE.offsetY;
-            const sideZ = CONFIG.CAMERA.VIEW.SIDE.offsetZ;
+            const sideY = characterPosition.y + CONFIG.CAMERA.VIEW.SIDE.offsetY;
+            const sideZ = characterPosition.z + CONFIG.CAMERA.VIEW.SIDE.offsetZ;
 
             const tpsX = characterPosition.x + CONFIG.CAMERA.VIEW.TPS.offsetX;
             const tpsY = characterPosition.y + CONFIG.CAMERA.VIEW.TPS.offsetY;
@@ -96,8 +96,8 @@ export class CameraManager {
             this.activeCamera.updateProjectionMatrix();
 
             const lookSideX = characterPosition.x;
-            const lookSideY = 0;
-            const lookSideZ = 0;
+            const lookSideY = characterPosition.y;
+            const lookSideZ = characterPosition.z;
 
             const lookTpsX = characterPosition.x + 2;
             const lookTpsY = characterPosition.y;
