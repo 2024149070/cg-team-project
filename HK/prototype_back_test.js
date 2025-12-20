@@ -1,9 +1,8 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-import { goal, pillarPositions, pillars, steps, bigwalls, smallfloors } from './map_test.js';
-import { initMap } from './map_generation.js';
-
+import { initMap } from './map_manager.js';
+import { CollisionHandlers } from './collision_manager.js';
 // --- 전역 변수 설정 ---
 const scene = new THREE.Scene();
 const loader = new GLTFLoader();
@@ -99,46 +98,12 @@ let isGrounded = true;
 const gltfLoader = new GLTFLoader();
 // 맵 엔티티 추가
 const floors = [];
-const obstacles = [];
+const colliders = [];
+
 const collisionObjects = [];
-await initMap(loader, scene, obstacles, floors, collisionObjects);
-
-scene.add(goal);
+await initMap(loader, scene, colliders, floors, colliders);
 
 
-///// 아파트 추가 /////
-
-
-gltfLoader.load(
-    './assets/apartment.glb',
-    (gltf) => {
-        const template = gltf.scene;
-        template.scale.set(1, 1, 1);
-
-        template.traverse((obj) => {
-            if (obj.isMesh) {
-                obj.castShadow = true;
-                obj.receiveShadow = true;
-            }
-        });
-
-        pillarPositions.forEach((pos) => {
-            const apartment = template.clone(true);
-
-            apartment.position.set(pos.x, pos.y, pos.z);
-            apartment.userData.originalZ = apartment.position.z;
-            apartment.bbox = new THREE.Box3().setFromObject(apartment);
-
-            scene.add(apartment);
-            pillars.push(apartment);
-            obstacles.push(apartment);
-        });
-    },
-    undefined,
-    (err) => {
-        console.error('apartment.glb 로드 실패: ', err);
-    }
-);
 
 
 // =========================================================
@@ -182,7 +147,7 @@ async function init() {
         
         // 모델 방향이 맞지 않다면 여기서 회전 (필요에 따라 조절)
         character.rotation.y = Math.PI / 2; // 예: 90도 회전
-
+        character.bbox = new THREE.Box3().setFromObject(character);
         // 그림자 설정
         character.traverse((child) => {
             if (child.isMesh) {
@@ -190,7 +155,18 @@ async function init() {
                 child.receiveShadow = true;
             }
         });
-
+        //#################### 캐릭터 착지 함수 추가############
+        character.userData.land = function() {
+            if (velocity.y <=0){
+                velocity.y = 0;
+                isGrounded = true;
+            }
+        }
+        //#################### 캐릭터 게임 승리 함수############
+        character.userData.finish = function() {
+            alert("도착했습니다!");
+            resetGame();
+        }
         scene.add(character);
         console.log("로딩 완료! 게임 시작");
 
@@ -202,6 +178,7 @@ async function init() {
         alert("캐릭터 모델을 불러오지 못했습니다.");
     }
 }
+
 
 // =========================================================
 // 이벤트 리스너
@@ -387,6 +364,9 @@ function createWeatherSystem(config) {
 function updatePhysics() {
     if (isTransitioning || !character) return; // character 체크 추가
 
+    
+
+
     const snowConfig = WEATHER_CONFIG.SNOW;
     const isOnSnow = character.position.x >= snowConfig.startX && 
                      character.position.x <= snowConfig.endX;
@@ -481,167 +461,42 @@ function updatePhysics() {
 
     // 플레이어 정보 업데이트 (Bounding Box 계산용)
     // 캐릭터 메쉬 크기에 따라 playerRadius 값 조절이 필요할 수 있습니다.
-    const playerRadius = 0.5; 
+    character.updateMatrixWorld(); 
 
-    const pMinX = character.position.x - playerRadius;
-    const pMaxX = character.position.x + playerRadius;
-    const pMinY = character.position.y - playerRadius; // 캐릭터의 중심점을 기준으로 계산
-    const pMaxY = character.position.y + playerRadius;
-    const pMinZ = character.position.z - playerRadius;
-    const pMaxZ = character.position.z + playerRadius;
+    // 2. BBox를 캐릭터의 현재 위치와 크기에 맞춰 다시 계산
+    // (캐릭터가 단순하다면 setFromCenterAndSize가 더 빠르지만, 가장 확실한 방법은 아래와 같습니다)
+    character.bbox.setFromObject(character);
+    const playerRadius = 0.5; 
 
     isGrounded = false;
 
-    for (const obstacle of obstacles) {
-        const box = obstacle.bbox;
+     for (const collider of colliders) {
+        
+        const pMin = character.bbox.min;
+        const pMax = character.bbox.max;
+
+        const box = collider.bbox;
         const oMin = box.min;
         const oMax = box.max;
 
-        const overlapX = pMaxX > oMin.x && pMinX < oMax.x;
-        const overlapY = pMaxY > oMin.y && pMinY < oMax.y;
+        const overlapX = pMax.x > oMin.x && pMin.x < oMax.x;
+        const overlapY = pMax.y > oMin.y && pMin.y < oMax.y;
         
         let overlapZ = true;
         if (!isOrtho) {
-            overlapZ = pMaxZ > oMin.z && pMinZ < oMax.z;
+            overlapZ = pMax.z > oMin.z && pMin.z < oMax.z;
         }
 
-        if (overlapX && overlapY && overlapZ) {
-            const depthX_Left = pMaxX - oMin.x;
-            const depthX_Right = oMax.x - pMinX;
-            const depthY_Bottom = pMaxY - oMin.y;
-            const depthY_Top = oMax.y - pMinY;
-            const depthZ_Back = pMaxZ - oMin.z;
-            const depthZ_Front = oMax.z - pMinZ;
+        const isCollision = overlapX && overlapY && overlapZ;
 
-            const minX = Math.min(depthX_Left, depthX_Right);
-            const minY = Math.min(depthY_Bottom, depthY_Top);
-            const minZ = isOrtho ? Infinity : Math.min(depthZ_Back, depthZ_Front);
-
-            const minOverlap = Math.min(minX, minY, minZ);
-
-            if (minOverlap === minY) {
-                velocity.y = 0;
-                if (depthY_Top < depthY_Bottom) {
-                    character.position.y = oMax.y + playerRadius;
-                    isGrounded = true;
-                } else {
-                    character.position.y = oMin.y - playerRadius;
-                }
-            } else if (minOverlap === minX) {
-                if (depthX_Left < depthX_Right) {
-                    character.position.x = oMin.x - playerRadius;
-                } else {
-                    character.position.x = oMax.x + playerRadius;
-                }
-            } else if (minOverlap === minZ) {
-                if (depthZ_Back < depthZ_Front) {
-                    character.position.z = oMin.z - playerRadius;
-                } else {
-                    character.position.z = oMax.z + playerRadius;
-                }
-            }
-        }
+        CollisionHandlers[collider.userData.type](character, collider, isOrtho, isCollision);
     }
     
-    collisionObjects.forEach(object => {
-        object.userData.collisionHandler(character, playerRadius, object, isOrtho)
-    });
-
     if (!isGrounded) { 
         playerBottomY = character.position.y - 0.5;
         const playerX = character.position.x;
         const playerZ = character.position.z;
-
-        for (const floor of floors) {
-            const box = floor.bbox;
-            const min = box.min;
-            const max = box.max;
-            const inX = playerX >= min.x - 0.2 && playerX <= max.x + 0.2;
-            let inZ = true;
-            if (!isOrtho) {
-                inZ = playerZ >= min.z - 0.1 && playerZ <= max.z + 0.1;
-            }
-
-            if (inX && inZ && velocity.y <= 0) {
-                if (playerBottomY <= max.y && playerBottomY >= min.y - 0.5) {
-                    isGrounded = true;
-                    velocity.y = 0;
-                    character.position.y = max.y + 0.5;
-                    if (isOrtho) {
-                        character.position.z = floor.position.z;
-                    }
-                    break;
-                }
-            }
-        }
     }
-    playerBottomY = character.position.y - playerRadius;
-    ///// 발판 색 바꾸기 /////
-    let allPressed = (steps.length > 0);
-    steps.forEach(step => {
-        const box = step.bbox;
-        const min = box.min;
-        const max = box.max;
-
-        // 발판(y) 위?
-        const onY = Math.abs(playerBottomY - max.y) < 0.06;
-
-        // x 범위 안?
-        const onX =
-        character.position.x >= min.x - playerRadius &&
-        character.position.x <= max.x + playerRadius;
-
-        // z 범위 안?
-        let onZ = isOrtho ? true : (character.position.z >= min.z && character.position.z <= max.z);
-
-        const onStep = onX && onY && onZ;
-
-        if (onStep) {
-            step.material.color.set(0x7CFC00);
-        }
-        else {
-            step.material.color.copy(step.userData.originalColor);
-        }
-
-        if (!onStep) {
-            allPressed = false;
-        }
-    });
-
-    ///// 발판 밟으면 bigWall 위로 이동 /////
-    const TARGET_WALL_INDEX = 0;
-    if (allPressed && bigwalls.length > TARGET_WALL_INDEX) {
-        const targetWall = bigwalls[TARGET_WALL_INDEX];
-        if (!targetWall.userData.raised) {
-            targetWall.position.y += 1.8;
-            targetWall.userData.raised = true;
-
-            targetWall.updateMatrixWorld();
-            targetWall.geometry.computeBoundingBox();
-            targetWall.bbox = new THREE.Box3().setFromObject(targetWall);
-
-            // bigWall 이동과 함께 작은 바닥 등장 (y좌표 이동)
-            const smallFloorConfigs = [
-                { index: 0, y: 0}, { index: 1, y: 1.5}, { index: 2, y: 0},
-            ];
-
-            smallFloorConfigs.forEach(cfg => {
-                const sf = smallfloors[cfg.index];
-                if (sf && !sf.userData.activated) {
-                    sf.position.y = cfg.y;
-                    sf.userData.activated = true;
-
-                    scene.add(sf);
-                    floors.push(sf);
-
-                    sf.updateMatrixWorld();
-                    sf.geometry.computeBoundingBox();
-                    sf.bbox = new THREE.Box3().setFromObject(sf);
-                }
-            });
-        }
-    }
-    
 
     if (character.position.y < -10) {
         isGameOver = true;
@@ -708,6 +563,7 @@ function updateCamera() {
 }
 
 function render() {
+
     // character가 로드된 이후에만 로직 실행
     if (!character) {
         // 아직 로딩중이라면 렌더만 돌리고 리턴할 수도 있음
@@ -722,13 +578,6 @@ function render() {
         return;
     }
 
-    // 도착 판정 (sphere -> character)
-    if (Math.abs(character.position.x - goal.position.x) < 0.5 &&
-        Math.abs(character.position.y - goal.position.y) < 1 &&
-        Math.abs(character.position.z - goal.position.z) < 1) {
-        alert("도착했습니다!");
-        return;
-    }
 
     updatePhysics();
     updateCamera();
@@ -779,7 +628,8 @@ function resetGame() {
         keys[key] = false;
     });
     character.rotation.y = Math.PI/2 
-
 }
+
+
 
 init();
