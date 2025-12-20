@@ -100,7 +100,7 @@ function traffic_light_zone_handler(player,playerRadius, zone, isOrtho){
 
 async function loadTrafficLight(loader) {
     // 1. 비동기로 로드
-    const gltf = await loader.loadAsync('./assets/trafficlight2.glb');
+    const gltf = await loader.loadAsync('./assets/trafficLight2.glb');
     const model = gltf.scene;
 
     // 2. 모델 기본 설정 (회전, 크기 등 모델 고유의 특성)
