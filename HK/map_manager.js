@@ -10,7 +10,7 @@ export async function initMap(loader, scene, colliders) {
 
     await createFloors(loader, scene, floorPositions, colliders);
 
-    await createStepPair(loader, scene, stepPositions, bigWallPosition, colliders);
+  //  await createStepPair(loader, scene, stepPositions, bigWallPosition, colliders);
 
     await createAPT(loader, scene, APTPositions, colliders);
 
