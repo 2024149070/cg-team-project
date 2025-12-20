@@ -102,7 +102,7 @@ export class Game {
             this.weatherSystem.init(this.assetManager, weatherZones, weatherFloors, weatherClouds, invisibleObstacles);
 
             // Load Character
-            const charGltf = await this.assetManager.loadGLTF('./assets/Character.glb');
+            const charGltf = await this.assetManager.loadGLTF('../assets/Character.glb');
             this.player.setMesh(charGltf.scene);
 
             console.log("Game Started");
@@ -218,3 +218,4 @@ export class Game {
         });
     }
 }
+
