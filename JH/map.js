@@ -189,7 +189,7 @@ async function initMap(scene, assetManager) {
 
     // Load Apartments
     try {
-        const gltf = await assetManager.loadGLTF('./assets/apartment.glb');
+        const gltf = await assetManager.loadGLTF('../assets/apartment.glb');
         const template = gltf.scene;
         template.scale.set(1, 1, 1);
         template.traverse((obj) => {
@@ -218,7 +218,7 @@ async function initMap(scene, assetManager) {
 
     // Load Cones
     try {
-        const gltf = await assetManager.loadGLTF('./assets/cone.glb');
+        const gltf = await assetManager.loadGLTF('../assets/cone.glb');
         const template = gltf.scene;
         template.scale.set(0.5, 0.5, 0.5); // Reduced size to 1/2
         template.traverse((obj) => {
@@ -290,5 +290,6 @@ async function initMap(scene, assetManager) {
         }
     });
 }
+
 
 export { floors, pillars, walls, obstacles, goal, pillarPositions, steps, bigwalls, weatherZones, initMap, weatherFloors, weatherClouds, invisibleObstacles };
