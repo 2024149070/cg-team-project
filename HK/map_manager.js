@@ -21,8 +21,8 @@ export async function initMap(loader, scene, colliders) {
     createWall(scene, wallPositions, colliders);
 
     createRamp(scene, rampPositions, { length: 5, height: 2, width: 3 }, colliders);
-    createInv(scene, invPositions, colliders);
 
+    createInv(scene, invPositions, colliders);
     console.log("맵 생성 완료");
 }
 
