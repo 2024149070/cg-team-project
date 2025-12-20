@@ -1,10 +1,9 @@
 import * as THREE from 'https://unpkg.com/three@0.159.0/build/three.module.js';
-import { loadTrafficLight } from './traffic_light.js';
 
-export async function traffic_light_zone(scene, loader, position,  collisionObjects, isDebugging = false){
+export async function traffic_light_zone(scene, loader, position,  collider, isDebugging = false){
     
     // traffic_light_zone에서의 상대적 위치 traffic_light
-    const traffic_light_pos = new THREE.Vector3(3,0,0)
+    const traffic_light_pos = new THREE.Vector3(3,0)
 
     
     const zoneGeometry = new THREE.BoxGeometry(4, 10, 10);
@@ -31,7 +30,7 @@ export async function traffic_light_zone(scene, loader, position,  collisionObje
     }
     zoneMesh.geometry.computeBoundingBox(); 
     zoneMesh.bbox = new THREE.Box3().setFromObject(zoneMesh);
-            
+    zoneMesh.userData.type = "traffic_zone";        
 
     const trafficLight = await loadTrafficLight(loader);
     trafficLight.position.set(position.x, position.y, position.z);
@@ -39,7 +38,7 @@ export async function traffic_light_zone(scene, loader, position,  collisionObje
     
     scene.add(zoneMesh)
     scene.add(trafficLight)
-    collisionObjects.push(zoneMesh)
+    collider.push(zoneMesh)
 }
 
 function traffic_light_zone_handler(player,playerRadius, zone, isOrtho){
@@ -97,4 +96,34 @@ function traffic_light_zone_handler(player,playerRadius, zone, isOrtho){
         }
     }
 }        
+}
+
+async function loadTrafficLight(loader) {
+    // 1. 비동기로 로드
+    const gltf = await loader.loadAsync('./assets/trafficlight2.glb');
+    const model = gltf.scene;
+
+    // 2. 모델 기본 설정 (회전, 크기 등 모델 고유의 특성)
+    model.scale.set(0.3, 0.3, 0.3); 
+    model.rotation.y = -Math.PI ;
+
+    // 3. 재질 및 그림자 설정 (빨간불 로직)
+    model.traverse((child) => {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+
+            if (child.name === 'Light_Red') {
+                child.material = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    emissive: 0xff0000,
+                    emissiveIntensity: 5,
+                    metalness: 0.1,
+                    roughness: 0.3
+                });
+            }
+        }
+    });
+    
+    return model;
 }

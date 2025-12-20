@@ -1,5 +1,4 @@
 import * as THREE from 'https://unpkg.com/three@0.159.0/build/three.module.js';
-import { loadTrafficLight } from './traffic_light.js';
 const floorPositions = [
     { x: 4, y: 0, z: 0 }, { x: 8, y: 0, z: 0 }, { x: 12, y: 0, z: 0 },
     { x: 16, y: 0, z: 0 }, { x: 20, y: 0, z: 0 }, { x: 24, y: 0, z: 0 },
