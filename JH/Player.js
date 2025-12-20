@@ -50,8 +50,9 @@ export class Player {
         this.scene.add(this.mesh);
     }
 
-    update(inputManager, isOrtho, colliders, weatherZones) {
+    update(inputManager, isOrtho, colliders, weatherZones, isTransitioning) {
         if (!this.mesh) return;
+        if (isTransitioning) return false;
 
         this.handleMovement(inputManager, isOrtho, weatherZones);
         this.applyGravity();
