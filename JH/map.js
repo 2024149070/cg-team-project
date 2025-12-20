@@ -123,7 +123,7 @@ const floorPositions = [
 
 async function loadFloor(loader) {
     // 1. 비동기로 로드
-    const gltf = await loader.loadAsync('./assets/road.glb');
+    const gltf = await loader.loadAsync('../assets/road.glb');
     let floorGeometry, floorMaterial;
 
     gltf.scene.traverse((child) => {
@@ -190,7 +190,7 @@ async function createStepPair(loader, scene, stepPositions, wallPosition, collid
     // HK createStepPair used loader.load (callback).
     // I should convert to loadAsync to properly await.
     try {
-        const gltf = await loader.loadAsync('./assets/bigWall.glb');
+        const gltf = await loader.loadAsync('../assets/bigWall.glb');
         const template = gltf.scene;
 
         template.traverse((obj) => {
@@ -228,7 +228,7 @@ const APTPositions = [
 ];
 async function createAPT(loader, scene, positions, colliders) {
     try {
-        const gltf = await loader.loadAsync('./assets/apartment.glb');
+        const gltf = await loader.loadAsync('../assets/apartment.glb');
         const template = gltf.scene;
         template.scale.set(1, 1, 1);
 
@@ -267,7 +267,7 @@ for (let i = 0; i < 16; i++) {
 
 async function createCones(loader, scene, positions, collider) {
     try {
-        const gltf = await loader.loadAsync('./assets/cone.glb');
+        const gltf = await loader.loadAsync('../assets/cone.glb');
         const template = gltf.scene;
 
         template.traverse((obj) => {
@@ -443,5 +443,6 @@ function createInv(scene, position, colliders) {
         // I should probably remove the fading logic from WeatherSystem or just let HK handle it.
         // HK handles it in 'inv' collision handler (which runs on update).
     });
+
 
 }
