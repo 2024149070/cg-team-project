@@ -98,7 +98,7 @@ const pillarPositions = [
 const pillars = [];
 
 const wallPositions = [
-    { x: 15, y: 15, z: 0 }, { x: 40, y: 1.5, z: -15 }
+    { x: 15, y: 1.5, z: 0 }, { x: 40, y: 1.5, z: -15 }
 ];
 
 const wallGeometry = new THREE.BoxGeometry(1, 3, 10);
@@ -293,3 +293,4 @@ async function initMap(scene, assetManager) {
 
 
 export { floors, pillars, walls, obstacles, goal, pillarPositions, steps, bigwalls, weatherZones, initMap, weatherFloors, weatherClouds, invisibleObstacles };
+
