@@ -3,24 +3,26 @@ import * as THREE from 'https://unpkg.com/three@0.159.0/build/three.module.js';
 import { traffic_light_zone } from './traffic_light_zone.js';
 
 // loader, scene, obstacles 배열을 인자로 받습니다.
-export async function initMap(loader, scene, colliders) { 
+export async function initMap(loader, scene, colliders) {
     console.log("맵 생성 시작");
 
-    await traffic_light_zone(scene, loader, {x:20,y:0,z:0}, colliders);
-    
+    await traffic_light_zone(scene, loader, { x: 20, y: 0, z: 0 }, colliders);
+
     await createFloors(loader, scene, floorPositions, colliders);
 
-    createStepPair(scene,stepPositions,bigWallPositions,colliders);
+    await createStepPair(loader, scene, stepPositions, bigWallPosition, colliders);
 
     await createAPT(loader, scene, APTPositions, colliders);
+
     await createCones(loader, scene, conePositions, colliders);
 
     createGoal(scene, goalPosition, colliders);
 
     createWall(scene, wallPositions, colliders);
 
-    createRamp(scene, { x: 40, y: 0, z: 0 },{ length: 5, height: 2, width: 3 },colliders);
-    
+    createRamp(scene, rampPositions, { length: 5, height: 2, width: 3 }, colliders);
+    createInv(scene, invPositions, colliders);
+
     console.log("맵 생성 완료");
 }
 
@@ -49,11 +51,10 @@ async function loadFloor(loader) {
     let floorGeometry, floorMaterial;
 
     gltf.scene.traverse((child) => {
-    if (child.isMesh && !floorGeometry) { 
-        floorGeometry = child.geometry;
-        floorMaterial = child.material; 
-    }
-    
+        if (child.isMesh && !floorGeometry) {
+            floorGeometry = child.geometry;
+            floorMaterial = child.material;
+        }
     });
     return [floorGeometry, floorMaterial];
 }
@@ -64,15 +65,15 @@ async function createFloors(loader, scene, positions, colliders) {
     positions.forEach(pos => {
         // Geometry와 Material을 재활용하여(인스턴싱 개념) 메쉬 생성
         const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-        floor.scale.set(0.5,0.5,0.5);
+        floor.scale.set(0.5, 0.5, 0.5);
         floor.position.set(pos.x, pos.y, pos.z);
         floor.userData.originalZ = floor.position.z;
         floor.userData.type = "floor";
         // BoundingBox 계산
         // (computeBoundingBox는 보통 geometry 레벨에서 한 번만 해도 되지만 안전하게 유지)
-        floor.geometry.computeBoundingBox(); 
+        floor.geometry.computeBoundingBox();
         floor.bbox = new THREE.Box3().setFromObject(floor);
-        
+
         // ★ 수정 2: 화면에 보이도록 scene에 추가
         scene.add(floor);
         colliders.push(floor);
@@ -84,11 +85,11 @@ async function createFloors(loader, scene, positions, colliders) {
 
 // 발판 기믹 생성.
 const stepPositions = [
-    { x: 33, y: 0.2, z: -2 }, { x: 34, y: 0.2, z: 3}
+    { x: 33, y: 0.2, z: -2 }, { x: 34, y: 0.2, z: 3 }
 ]
-const bigWallPositions = { x: 37, y: 2.5, z: 0 };
+const bigWallPosition = { x: 37, y: 2.5, z: 0 };
 
-function createStepPair(scene,stepPositions,wallPosition, colliders){
+async function createStepPair(loader, scene, stepPositions, wallPosition, colliders) {
     const stepGeometry = new THREE.BoxGeometry(1, 0.2, 1);
     const stepMaterial = new THREE.MeshLambertMaterial({ color: 0xffa500 });
     const steps = [];
@@ -109,61 +110,81 @@ function createStepPair(scene,stepPositions,wallPosition, colliders){
     steps[0].userData.pair = steps[1];
     steps[1].userData.pair = steps[0];
 
-    const bigWallGeometry = new THREE.BoxGeometry(1, 5, 10); 
-    const bigWallMaterial = new THREE.MeshLambertMaterial({ color: 0xa8b2d2 });
+    loader.load(
+        './assets/bigWall.glb',
+        (gltf) => {
+            const template = gltf.scene;
 
-    const bigwall = new THREE.Mesh(bigWallGeometry, bigWallMaterial);
-    bigwall.position.set(wallPosition.x, wallPosition.y, wallPosition.z);
-    bigwall.userData.originalZ = bigwall.position.z;
-    bigwall.userData.raised = false; // 발판 밟았을 때 벽 이동 한 번만 하도록
-    bigwall.geometry.computeBoundingBox();
-    bigwall.bbox = new THREE.Box3().setFromObject(bigwall);
-    bigwall.userData.type = "obstacle";
-    steps[0].userData.target = bigwall;
-    steps[1].userData.target = bigwall;
+            template.traverse((obj) => {
+                if (obj.isMesh) {
+                    obj.castShadow = true;
+                    obj.receiveShadow = true;
+                }
+            });
+            const bigWallMesh = template.clone(true);
+            bigWallMesh.scale.set(0.7, 0.7, 0.7);
+            bigWallMesh.position.set(wallPosition.x, wallPosition.y, wallPosition.z);
 
-    colliders.push(bigwall);
-    scene.add(bigwall);
+            bigWallMesh.userData.initialPosition = bigWallMesh.position.clone();
+            bigWallMesh.userData.raised = false;
+
+            bigWallMesh.updateMatrixWorld(true);
+            bigWallMesh.bbox = new THREE.Box3().setFromObject(bigWallMesh);
+            bigWallMesh.userData.type = "obstacle";
+            steps[0].userData.target = bigWallMesh;
+            steps[1].userData.target = bigWallMesh;
+            scene.add(bigWallMesh)
+
+            colliders.push(bigWallMesh);
+        },
+        undefined,
+        (err) => {
+            console.error('bigWall glb 로드 실패:', err);
+        }
+    )
+
 
 
 }
 
+
+
 //건물 생성.
 const APTPositions = [
-    { x: 6, y: 4, z: -3 }, { x: 10, y: 4, z: 2 }
+    { x: 6, y: 1.8, z: -3 }, { x: 10, y: 1.8, z: 2 }
 ];
 async function createAPT(loader, scene, positions, colliders) {
     loader.load(
-    './assets/apartment.glb',
-    (gltf) => {
-        const template = gltf.scene;
-        template.scale.set(1, 1, 1);
+        './assets/apartment.glb',
+        (gltf) => {
+            const template = gltf.scene;
+            template.scale.set(1, 1, 1);
 
-        template.traverse((obj) => {
-            if (obj.isMesh) {
-                obj.castShadow = true;
-                obj.receiveShadow = true;
-            }
-        });
+            template.traverse((obj) => {
+                if (obj.isMesh) {
+                    obj.castShadow = true;
+                    obj.receiveShadow = true;
+                }
+            });
 
-        positions.forEach((pos) => {
-            const apartment = template.clone(true);
+            positions.forEach((pos) => {
+                const apartment = template.clone(true);
 
-            apartment.position.set(pos.x, pos.y, pos.z);
-            apartment.userData.originalZ = apartment.position.z;
-            apartment.bbox = new THREE.Box3().setFromObject(apartment);
-            apartment.userData.type = 'obstacle';
-            scene.add(apartment);
-            colliders.push(apartment);
-        });
-    },
-    undefined,
-    (err) => {
-        console.error('apartment.glb 로드 실패: ', err);
-    }
+                apartment.position.set(pos.x, pos.y, pos.z);
+                apartment.userData.originalZ = apartment.position.z;
+                apartment.bbox = new THREE.Box3().setFromObject(apartment);
+                apartment.userData.type = 'obstacle';
+                scene.add(apartment);
+                colliders.push(apartment);
+            });
+        },
+        undefined,
+        (err) => {
+            console.error('apartment.glb 로드 실패: ', err);
+        }
     );
 
-    
+
 }
 
 // 콘 생성
@@ -210,8 +231,8 @@ const wallPositions = [
     { x: 65, y: 1, z: 0 }
 ];
 
-function createWall(scene, positions, colliders){
-    const wallGeometry = new THREE.BoxGeometry(1, 1.5, 10); 
+function createWall(scene, positions, colliders) {
+    const wallGeometry = new THREE.BoxGeometry(1, 1.5, 10);
     const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xa8b2d2b });
 
 
@@ -230,7 +251,8 @@ function createWall(scene, positions, colliders){
 }
 
 // 경사로 생성.
-function createRamp(scene, position, size, colliders) {
+const rampPositions = [{ x: 40, y: 0, z: 0 }];
+function createRamp(scene, positions, size, colliders) {
     // size = { length: X축 길이, height: Y축 높이, width: Z축 폭 }
     const { length, height, width } = size;
 
@@ -256,48 +278,101 @@ function createRamp(scene, position, size, colliders) {
     geometry.translate(0, 0, -width / 2);
 
     const material = new THREE.MeshStandardMaterial({ color: 0x88ccff });
-    const ramp = new THREE.Mesh(geometry, material);
-    ramp.position.set(position.x,position.y,position.z);
-    
-    // 그림자 설정
-    ramp.receiveShadow = true;
-    ramp.castShadow = true;
+    positions.forEach(pos => {
+        const ramp = new THREE.Mesh(geometry, material);
+        ramp.position.set(pos.x, pos.y, pos.z);
+        // 그림자 설정
+        ramp.receiveShadow = true;
+        ramp.castShadow = true;
 
-    // 4. 필수 데이터 계산 및 저장 (★ 핵심 부분)
-    // 월드 좌표계 기준의 BBox를 구합니다.
-    ramp.updateMatrixWorld();
-    geometry.computeBoundingBox();
-    ramp.bbox = new THREE.Box3().setFromObject(ramp);
+        // 4. 필수 데이터 계산 및 저장 (★ 핵심 부분)
+        // 월드 좌표계 기준의 BBox를 구합니다.
+        ramp.updateMatrixWorld();
+        geometry.computeBoundingBox();
+        ramp.bbox = new THREE.Box3().setFromObject(ramp);
 
-    // 물리 계산에 필요한 데이터를 userData에 저장합니다.
-    // 경사가 X축 방향으로 올라간다고 가정합니다.
-    ramp.userData = {
-        type: "ramp",
-        // 경사로의 시작 X좌표와 끝 X좌표 (월드 기준)
-        startX: ramp.bbox.min.x,
-        endX: ramp.bbox.max.x,
-        // 경사로의 바닥 높이와 꼭대기 높이 (월드 기준)
-        baseY: ramp.bbox.min.y,
-        topY: ramp.bbox.min.y + height, // 또는 ramp.bbox.max.y (정확히 일치한다면)
-        // 미리 계산해둔 길이 (나눗셈 최적화용)
-        lengthX: ramp.bbox.max.x - ramp.bbox.min.x
-    };
+        // 물리 계산에 필요한 데이터를 userData에 저장합니다.
+        // 경사가 X축 방향으로 올라간다고 가정합니다.
+        ramp.userData = {
+            type: "ramp",
+            // 경사로의 시작 X좌표와 끝 X좌표 (월드 기준)
+            startX: ramp.bbox.min.x,
+            endX: ramp.bbox.max.x,
+            // 경사로의 바닥 높이와 꼭대기 높이 (월드 기준)
+            baseY: ramp.bbox.min.y,
+            topY: ramp.bbox.min.y + height, // 또는 ramp.bbox.max.y (정확히 일치한다면)
+            // 미리 계산해둔 길이 (나눗셈 최적화용)
+            lengthX: ramp.bbox.max.x - ramp.bbox.min.x
+        };
 
-    scene.add(ramp);
-    colliders.push(ramp);
+        scene.add(ramp);
+        colliders.push(ramp);
+    });
+}
+//싱크홀 생성
+// 대충 8 x 10 (xz평면) 정도의 크기를 차지함.
+// const sinkHolePositions = [
+//     { x: 23, y: 0, z: -3 }, { x: 23, y: 0, z: -2 }, { x: 23, y: 0, z: -1 }, { x: 23, y: 0, z: 0 },
+//     { x: 23, y: 0, z: 1 }, { x: 23, y: 0, z: 2 }, { x: 23, y: 0, z: 3 },
+//     { x: 24, y: 0, z: -3 }, { x: 24, y: 0, z: -2 }, { x: 24, y: 0, z: -1 }, { x: 24, y: 0, z: 0 },
+//     { x: 24, y: 0, z: 1 }, { x: 24, y: 0, z: 2 }, { x: 24, y: 0, z: 3 },
+//     { x: 25, y: 0, z: -3 }, { x: 25, y: 0, z: -2 }, { x: 25, y: 0, z: -1 }, { x: 25, y: 0, z: 0 },
+//     { x: 25, y: 0, z: 1 }, { x: 25, y: 0, z: 2 }, { x: 25, y: 0, z: 3 },
+//     { x: 26, y: 0, z: -3 }, { x: 26, y: 0, z: -2 }, { x: 26, y: 0, z: -1 }, { x: 26, y: 0, z: 0 },
+//     { x: 26, y: 0, z: 1 }, { x: 26, y: 0, z: 2 }, { x: 26, y: 0, z: 3 },
+//     { x: 27, y: 0, z: -3 }, { x: 27, y: 0, z: -2 }, { x: 27, y: 0, z: -1 }, { x: 27, y: 0, z: 0 },
+//     { x: 27, y: 0, z: 1 }, { x: 27, y: 0, z: 2 }, { x: 27, y: 0, z: 3 },
+//     { x: 28, y: 0, z: -3 }, { x: 28, y: 0, z: -2 }, { x: 28, y: 0, z: -1 }, { x: 28, y: 0, z: 0 },
+//     { x: 28, y: 0, z: 1 }, { x: 28, y: 0, z: 2 }, { x: 28, y: 0, z: 3 },    
+//     { x: 29, y: 0, z: -3 }, { x: 29, y: 0, z: -2 }, { x: 29, y: 0, z: -1 }, { x: 29, y: 0, z: 0 },
+//     { x: 29, y: 0, z: 1 }, { x: 29, y: 0, z: 2 }, { x: 29, y: 0, z: 3 },
+// ]
+
+// const sinkHoleGeometry = new THREE.BoxGeometry(1, 0.5, 1);
+// const sinkHoleMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
+// const sinkHoles = [];
+
+// sinkHolePositions.forEach(pos => {
+//     const sinkHole = new THREE.Mesh(sinkHoleGeometry, sinkHoleMaterial);
+//     sinkHole.position.set(pos.x, pos.y, pos.z);
+//     sinkHole.geometry.computeBoundingBox();
+//     sinkHole.bbox = new THREE.Box3().setFromObject(sinkHole);
+//     sinkHoles.push(sinkHole);
+// });
+
+const invPositions = [{x:3, y:3,z:0}];
+
+function createInv(scene, position, colliders) {
+    const invGeometry = new THREE.BoxGeometry(2, 0.5, 2);
+    const invMaterial = new THREE.MeshLambertMaterial({
+        color: 0xa8b2d2,
+        transparent: true,
+        opacity: 0.0
+    });
+    position.forEach(pos => {
+        const material = invMaterial.clone();
+        const inv = new THREE.Mesh(invGeometry, material);
+        inv.position.set(pos.x, pos.y, pos.z);
+        inv.userData.originalZ = inv.position.z;
+        inv.geometry.computeBoundingBox();
+        inv.bbox = new THREE.Box3().setFromObject(inv);
+        inv.userData.type="inv";
+        colliders.push(inv);
+        scene.add(inv);
+    });
+
 }
 
 
 
 
-
 // goal 생성
-const goalPosition = {x:80, y: 0.7, z:0};
-function createGoal(scene, position, colliders){
+const goalPosition = { x: 80, y: 0.7, z: 0 };
+function createGoal(scene, position, colliders) {
     const goalGeometry = new THREE.IcosahedronGeometry(0.5, 0);
     const goalMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
     const goal = new THREE.Mesh(goalGeometry, goalMaterial);
-    
+
     goal.position.set(position.x, position.y, position.z);
 
     goal.bbox = new THREE.Box3().setFromObject(goal);

@@ -52,14 +52,14 @@ export const CollisionHandlers = {
         const targetY = data.baseY + (t * (data.topY - data.baseY));
         const playerFeetY = player.bbox.min.y;
 
-        if(playerFeetY <= targetY - 0.20 ){
-              resolveCollision(player, object, isOrtho)
+        if (playerFeetY <= targetY - 0.20) {
+            resolveCollision(player, object, isOrtho)
         }
-        else if (playerFeetY <= targetY + 0.01 ) { 
-            player.position.y = targetY + (player.bbox.max.y-player.bbox.min.y)/2;
+        else if (playerFeetY <= targetY + 0.01) {
+            player.position.y = targetY + (player.bbox.max.y - player.bbox.min.y) / 2;
 
             if (player.userData.land) {
-                player.userData.land();
+                player.userData.land(object);
             } else {
                 player.userData.isGrounded = true;
                 if (velocity.y < 0) velocity.y = 0;
@@ -67,7 +67,36 @@ export const CollisionHandlers = {
             player.updateMatrixWorld();
             player.bbox.setFromObject(player);
         }
+    },
+    "inv": (player, object, isOrtho, isCollision) => {
+        const characterPos = player.position
+        const dx = Math.abs(characterPos.x - object.position.x);
+        const dy = Math.abs(characterPos.y - object.position.y);
+        let dz = Math.abs(characterPos.z - object.position.z);
 
+        if (isOrtho) {
+            dz = 0; // Ignore Z distance in Ortho mode
+        }
+
+        const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        const FADE_START = 8.0; // Start fading in at 8 units
+        const FADE_FULL = 4.0;  // Fully visible at 4 units
+
+        let intensity = 0;
+        if (distance <= FADE_FULL) {
+            intensity = 1;
+        } else if (distance <= FADE_START) {
+            intensity = 1 - (distance - FADE_FULL) / (FADE_START - FADE_FULL);
+        }
+
+        if (intensity < 0) intensity = 0;
+        if (intensity > 1) intensity = 1;
+
+        object.material.opacity = intensity;
+        if (isCollision) {
+            resolveCollision(player, object, isOrtho);
+
+        }
     }
 }
 
@@ -91,7 +120,7 @@ function resolveCollision(playerMesh, objectMesh, isOrtho) {
 
     } else if (minOverlap === overlapY) {
         playerMesh.position.y += (playerMesh.position.y < objectMesh.position.y) ? -overlapY : overlapY;
-        playerMesh.userData.land();
+        playerMesh.userData.land(objectMesh);
     } else if (minOverlap === overlapZ) {
         playerMesh.position.z += (playerMesh.position.z < objectMesh.position.z) ? -overlapZ : overlapZ;
     }

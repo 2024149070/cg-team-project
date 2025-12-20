@@ -156,10 +156,13 @@ async function init() {
             }
         });
         //#################### 캐릭터 착지 함수 추가############
-        character.userData.land = function() {
+        character.userData.land = function(object) {
             if (velocity.y <=0){
                 velocity.y = 0;
                 isGrounded = true;
+            }
+            if (isOrtho){
+                character.position.z = object.position.z; //밟고 있는 오브젝트 위로 z 이동
             }
         }
         //#################### 캐릭터 게임 승리 함수############
