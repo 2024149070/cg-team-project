@@ -4,13 +4,18 @@ import { traffic_light_zone } from './traffic_light_zone.js';
 export const weatherZones = [
     {
         type: 'RAIN',
-        position: { x: 20, y: 5, z: 0 },
+        position: { x: 50, y: 5, z: 0 },
         size: { x: 10, y: 10, z: 10 }
     },
     {
         type: 'SNOW',
-        position: { x: 80, y: 5, z: 0 },
+        position: { x: 65, y: 5, z: 0 },
         size: { x: 10, y: 10, z: 10 }
+    },
+    {
+        type: 'SNOW',
+        position: { x: 100, y: 5, z: 0 },
+        size: { x: 20, y: 10, z: 10 }
     }
 ];
 
@@ -21,7 +26,7 @@ export const invisibleObstacles = []; // Will be populated with 'inv' objects
 // These are kept for compatibility if needed, but will be empty or unused
 export const floors = [];
 export const obstacles = [];
-export const goal = { position: { x: 80, y: 0.7, z: 0 } }; // HK defines goal position locally, but Game.js uses it for distance check
+export const goal = { position: { x: 120, y: 0.7, z: 0 } }; // HK defines goal position locally, but Game.js uses it for distance check
 export const pillars = [];
 export const pillarPositions = [];
 export const steps = [];
@@ -31,7 +36,7 @@ export const bigwalls = [];
 export async function initMap(loader, scene, colliders) {
     console.log("맵 생성 시작");
 
-    await traffic_light_zone(scene, loader, { x: 20, y: 0, z: 0 }, colliders);
+    await traffic_light_zone(scene, loader, { x: 40, y: 0, z: 0 }, colliders);
 
     await createFloors(loader, scene, floorPositions, colliders);
 
@@ -96,29 +101,33 @@ export async function initMap(loader, scene, colliders) {
 
 // 바닥 생성
 const floorPositions = [
+    { x: -20, y: 0, z: 0 },
     { x: -16, y: 0, z: 0 }, { x: -12, y: 0, z: 0 }, { x: -8, y: 0, z: 0 },
     { x: -4, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }, { x: 4, y: 0, z: 0 },
     { x: 8, y: 0, z: 0 }, { x: 12, y: 0, z: 0 }, { x: 16, y: 0, z: 0 },
     { x: 20, y: 0, z: 0 }, { x: 24, y: 0, z: 0 }, { x: 28, y: 0, z: 0 },
     { x: 32, y: 0, z: 0 }, { x: 36, y: 0, z: 0 }, { x: 40, y: 0, z: 0 },
-    { x: 44, y: 0, z: 0 }, //{ x: 48, y: 0, z: 0 }, { x: 52, y: 0, z: 0 },
+    { x: 44, y: 0, z: 0 }, { x: 47, y: 0, z: 0 }, { x: 52, y: 0, z: 0 },
     { x: 56, y: 0, z: 0 }, { x: 60, y: 0, z: 0 }, { x: 64, y: 0, z: 0 },
     { x: 68, y: 0, z: 0 }, { x: 72, y: 0, z: 0 }, { x: 76, y: 0, z: 0 },
     { x: 80, y: 0, z: 0 }, { x: 84, y: 0, z: 0 }, { x: 88, y: 0, z: 0 },
     { x: 92, y: 0, z: 0 }, { x: 96, y: 0, z: 0 }, { x: 100, y: 0, z: 0 },
+    { x: 104, y: 0, z: 0 }, { x: 108, y: 0, z: 0 }, { x: 112, y: 0, z: 0 },
+    { x: 116, y: 0, z: 0 }, { x: 120, y: 0, z: 0 }, { x: 124, y: 0, z: 0 },
 
 
-    { x: -20, y: 0, z: -15 }, { x: -16, y: 0, z: -15 }, { x: -12, y: 0, z: -15 },
-    { x: -8, y: 0, z: -15 }, { x: -4, y: 0, z: -15 }, { x: 0, y: 0, z: -15 },
-    { x: 4, y: 0, z: -15 }, { x: 8, y: 0, z: -15 }, { x: 12, y: 0, z: -15 },
-    { x: 16, y: 0, z: -15 }, { x: 20, y: 0, z: -15 }, { x: 24, y: 0, z: -15 },
-    { x: 28, y: 0, z: -15 }, { x: 32, y: 0, z: -15 }, { x: 36, y: 0, z: -15 },
-    { x: 40, y: 0, z: -15 }, { x: 44, y: 0, z: -15 }, { x: 48, y: 0, z: -15 },
-    { x: 52, y: 0, z: -15 }, { x: 56, y: 0, z: -15 }, { x: 60, y: 0, z: -15 },
-    { x: 64, y: 0, z: -15 }, { x: 68, y: 0, z: -15 }, { x: 72, y: 0, z: -15 },
-    { x: 76, y: 0, z: -15 }, { x: 80, y: 0, z: -15 }, { x: 84, y: 0, z: -15 },
-    { x: 88, y: 0, z: -15 }, { x: 92, y: 0, z: -15 }, { x: 96, y: 0, z: -15 },
-    { x: 100, y: 0, z: -15 }
+    //{ x: -20, y: 0, z: -15 }, { x: -16, y: 0, z: -15 }, { x: -12, y: 0, z: -15 },    
+    //{ x: -8, y: 0, z: -15 }, //{ x: -4, y: 0, z: -15 }, { x: 0, y: 0, z: -15 },
+    //{ x: 4, y: 0, z: -15 },
+    { x: 8, y: 0, z: -15 }, { x: 12, y: 0, z: -15 },
+    //{ x: 16, y: 0, z: -15 }, { x: 20, y: 0, z: -15 }, { x: 24, y: 0, z: -15 },
+    //{ x: 28, y: 0, z: -15 }, { x: 32, y: 0, z: -15 }, { x: 36, y: 0, z: -15 },
+    //{ x: 40, y: 0, z: -15 }, { x: 44, y: 0, z: -15 }, { x: 48, y: 0, z: -15 },
+    //{ x: 52, y: 0, z: -15 }, { x: 56, y: 0, z: -15 }, { x: 60, y: 0, z: -15 },
+    //{ x: 64, y: 0, z: -15 }, { x: 68, y: 0, z: -15 }, { x: 72, y: 0, z: -15 },
+    //{ x: 76, y: 0, z: -15 }, { x: 80, y: 0, z: -15 }, { x: 84, y: 0, z: -15 },
+    //{ x: 88, y: 0, z: -15 }, { x: 92, y: 0, z: -15 }, { x: 96, y: 0, z: -15 },
+    //{ x: 100, y: 0, z: -15 }
 ];
 
 async function loadFloor(loader) {
@@ -159,9 +168,9 @@ async function createFloors(loader, scene, positions, colliders) {
 
 // 발판 기믹 생성.
 const stepPositions = [
-    { x: 33, y: 0.2, z: -2 }, { x: 34, y: 0.2, z: 3 }
+    { x: 75, y: 0.2, z: -2 }, { x: 76, y: 0.2, z: 3 }
 ]
-const bigWallPosition = { x: 37, y: 2.5, z: 0 };
+const bigWallPosition = { x: 80, y: 2.5, z: 0 };
 
 async function createStepPair(loader, scene, stepPositions, wallPosition, colliders) {
     const stepGeometry = new THREE.BoxGeometry(1, 0.2, 1);
@@ -223,6 +232,7 @@ async function createStepPair(loader, scene, stepPositions, wallPosition, collid
 //건물 생성.
 const APTPositions = [
     { x: -2, y: 1.8, z: 0 }, { x: 6, y: 1.8, z: -3 }, { x: 10, y: 1.8, z: 2 },
+    { x: 25, y: 1.8, z: 2 }, { x: 56, y: 1.8, z: 2 },
 
     { x: 8, y: 1.8, z: -17 }, { x: 12, y: 1.8, z: -14 }
 ];
@@ -257,11 +267,39 @@ async function createAPT(loader, scene, positions, colliders) {
 
 // 콘 생성
 const conePositions = [];
-for (let i = 0; i < 16; i++) {
+for (let i = 0; i < 15; i++) {
     conePositions.push({
-        x: 75 + Math.random() * 10,
+        x: 60 + 10 * Math.random(),
         y: 0.4, // Adjusted for smaller scale
-        z: -5 + Math.random() * 10
+        z: -4.5 + 10 * Math.random()
+    });
+}
+for (let i = 0; i < 9; i++) {
+    conePositions.push({
+        x: 91.5 + i,
+        y: 0.4, // Adjusted for smaller scale
+        z: -4.5 + i
+    });
+}
+for (let i = 0; i < 7; i++) {
+    conePositions.push({
+        x: 91.5 + i,
+        y: 0.4, // Adjusted for smaller scale
+        z: -1.5 + i
+    });
+}
+for (let i = 0; i < 8; i++) {
+    conePositions.push({
+        x: 100.5 + i,
+        y: 0.4, // Adjusted for smaller scale
+        z: 2.5 - i
+    });
+}
+for (let i = 0; i < 9; i++) {
+    conePositions.push({
+        x: 101.5 + i,
+        y: 0.4, // Adjusted for smaller scale
+        z: 4.5 - i
     });
 }
 
@@ -298,9 +336,10 @@ async function createCones(loader, scene, positions, collider) {
 
 // 벽 생성
 const wallPositions = [
-    { x: 15, y: 15, z: 0 }, { x: 45.5, y: 1.5, z: -15 }, { x: 46.5, y: 1.5, z: -15 },
-    { x: 47.5, y: 1.5, z: -15 }, { x: 48.5, y: 1.5, z: -15 }, { x: 49.5, y: 1.5, z: -15 },
-    { x: 50.5, y: 1.5, z: -15 }, { x: 51.5, y: 1.5, z: -15 }, { x: 52.5, y: 1.5, z: -15 }
+    { x: 15, y: 1.75, z: 0 },
+    //{ x: 45.5, y: 1.75, z: -15 }, { x: 46.5, y: 1.75, z: -15 },
+    //{ x: 47.5, y: 1.75, z: -15 }, { x: 48.5, y: 1.75, z: -15 }, { x: 49.5, y: 1.75, z: -15 },
+    //{ x: 50.5, y: 1.75, z: -15 }, { x: 51.5, y: 1.75, z: -15 }, { x: 52.5, y: 1.75, z: -15 }
 ];
 
 function createWall(scene, positions, colliders) {
@@ -323,7 +362,7 @@ function createWall(scene, positions, colliders) {
 }
 
 // 경사로 생성.
-const rampPositions = [{ x: 40, y: 0, z: 0 }];
+const rampPositions = [{ x: 90, y: 90, z: 0 }];
 function createRamp(scene, positions, size, colliders) {
     // size = { length: X축 길이, height: Y축 높이, width: Z축 폭 }
     const { length, height, width } = size;
@@ -384,7 +423,7 @@ function createRamp(scene, positions, size, colliders) {
 }
 
 // goal 생성
-const goalPosition = { x: 100, y: 0.7, z: 0 };
+const goalPosition = { x: 120, y: 0.7, z: 0 };
 function createGoal(scene, position, colliders) {
     const goalGeometry = new THREE.IcosahedronGeometry(0.5, 0);
     const goalMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
@@ -403,15 +442,15 @@ function createGoal(scene, position, colliders) {
 const invPositions = [];
 for (let i = 0; i < 8; i++) {
     invPositions.push({
-        x: -21,
-        y: 1 + i * 1.5,
+        x: -23,
+        y: 0 + i * 1.5,
         z: -16 + 2 * Math.pow(-1, i)
     });
 }
-for (let i = 0; i < 12; i++) {
+for (let i = 0; i < 13; i++) {
     invPositions.push({
-        x: -21 + i * 2,
-        y: 1 + 7 * 1.5,
+        x: -23 + i * 2,
+        y: 0 + 7 * 1.5,
         z: -18
     });
 }
@@ -443,6 +482,5 @@ function createInv(scene, position, colliders) {
         // I should probably remove the fading logic from WeatherSystem or just let HK handle it.
         // HK handles it in 'inv' collision handler (which runs on update).
     });
-
 
 }
