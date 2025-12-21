@@ -1,342 +1,48 @@
-<!DOCTYPE html>
-<html>
+import * as THREE from 'three';
 
-<head>
-    <meta charset="utf-8">
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Noto Sans KR', sans-serif, Arial;
-            /* 폰트 전체 적용 */
+export const CONFIG = {
+    SPEED: {
+        DEFAULT: 0.1,
+        SLOW: 0.05,
+        MAX: 0.15,
+        ACCEL: 0.1,
+        FRICTION: 0.0,
+        SNOW_ACCEL: 0.005,
+        SNOW_FRICTION: 0.96
+    },
+    PHYSICS: {
+        GRAVITY: -0.01,
+        JUMP_POWER: 0.2,
+        PLAYER_RADIUS: 0.5
+    },
+    CAMERA: {
+        ORTHO_Z: 5.5,
+        ORTHO_Y: 0,
+        FRUSTUM_SIZE: 5.8,
+        VIEW: {
+            SIDE: { offsetX: 0, offsetY: 0, offsetZ: 100, fov: 3.3 },
+            TPS: { offsetX: -6, offsetY: 3, offsetZ: 0, fov: 60 }
         }
-
-        /* 팝업창 공통 디자인 - Delivery App Style */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background-color: white;
-            width: 380px;
-            /* Slightly wider for the layout */
-            padding: 25px;
-            border-radius: 20px;
-            text-align: left;
-            /* Left align for this specific design */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            font-family: 'Noto Sans KR', sans-serif, Arial;
-            position: relative;
-        }
-
-        /* Delivery Badge */
-        .badge-alddle {
-            display: inline-block;
-            background-color: #E6F7FF;
-            color: #2AC1BC;
-            font-weight: bold;
-            font-size: 13px;
-            padding: 4px 8px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-        }
-
-        /* Header Text */
-        .arrival-time {
-            font-size: 26px;
-            font-weight: 800;
-            color: #333;
-            margin-bottom: 4px;
-        }
-
-        .sub-text {
-            font-size: 15px;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        /* Body Layout */
-        .delivery-body {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
-
-        /* Timeline */
-        .timeline-container {
-            flex: 1;
-            position: relative;
-            padding-left: 15px;
-        }
-
-        /* The vertical line */
-        .timeline-container::before {
-            content: '';
-            position: absolute;
-            left: 6px;
-            top: 8px;
-            bottom: 25px;
-            width: 2px;
-            background-color: #E0E0E0;
-            z-index: 0;
-        }
-
-        /* Active line segment (Green) - Simulating progress */
-        .timeline-container::after {
-            content: '';
-            position: absolute;
-            left: 6px;
-            top: 8px;
-            height: 60%;
-            /* Adjust based on 'Delivering' position */
-            width: 2px;
-            background-color: #2AC1BC;
-            z-index: 0;
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1;
-            font-size: 15px;
-            color: #888;
-        }
-
-        .timeline-item.active {
-            color: #333;
-            font-weight: bold;
-        }
-
-        .timeline-item.future {
-            color: #BBB;
-        }
-
-        /* The dot */
-        .timeline-dot {
-            position: absolute;
-            left: -15px;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #E0E0E0;
-            border: 2px solid white;
-            box-shadow: 0 0 0 2px white;
-            /* Cleaner spacing from line */
-        }
-
-        .timeline-item.passed .timeline-dot,
-        .timeline-item.active .timeline-dot {
-            background-color: #2AC1BC;
-        }
-
-        .time-label {
-            font-size: 13px;
-            color: #999;
-            margin-left: auto;
-            /* Push to right */
-        }
-
-        /* Character Image Area */
-        .character-display {
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-            animation: bounce 2s infinite;
-        }
-
-        /* Button override */
-        .modal-btn {
-            width: 100%;
-            background-color: #2AC1BC;
-            /* Mint color */
-            color: white;
-            border: none;
-            padding: 15px 0;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .modal-btn:hover {
-            background-color: #25A8A3;
-        }
-
-        /* Keyframes */
-        @keyframes bounce {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-5px);
-            }
-        }
-
-        /* Existing UI adjustments */
-        #timer-ui {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-
-            background-color: rgba(0, 0, 0, 0.6);
-            /* 반투명 검은 배경 */
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 20px;
-            font-weight: bold;
-            z-index: 500;
-            /* 게임 화면보다 위에 */
-            font-family: 'Noto Sans KR', sans-serif, Arial;
-        }
-
-        /* 시간이 얼마 안 남았을 때 빨간색으로 변경할 클래스 */
-        .urgent {
-            color: #ff6b6b;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        #warning-msg {
-            position: fixed;
-            top: 30%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: #ff4444;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 24px;
-            font-weight: bold;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-            z-index: 2000;
-        }
-
-        #warning-msg.show {
-            opacity: 1;
-        }
-    </style>
-
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/"
+    },
+    GAME: {
+        TIME_LIMIT: 180
+    },
+    COLORS: {
+        SKY: new THREE.Color(0xb8f8fd),
+        DARK: new THREE.Color(0x0E0F37)
+    },
+    WEATHER: {
+        RAIN: {
+            color: 0x558BCF, size: 1,
+            count: 100,
+            fallSpeed: 0.4, windSpeed: 0.1, wiggle: false,
+            blending: THREE.NormalBlending
+        },
+        SNOW: {
+            color: 0xffffff, size: 0.7,
+            count: 100,
+            fallSpeed: 0.05, windSpeed: 0.02, wiggle: true,
+            blending: THREE.NormalBlending
         }
     }
-    </script>
-    <script type="module" src="./main.js"></script>
-</head>
-
-<body>
-    <div id="warning-msg">빨간불이에요. 건너면 안돼요!</div>
-    <div id="start-modal" class="modal-overlay">
-        <div class="modal-content">
-            <!-- Badge -->
-            <div class="badge-alddle">한집배달</div>
-
-            <!-- Header -->
-            <h2 class="arrival-time">3분 이내 도착 예정</h2>
-            <p class="sub-text">목적지에 빨리 도착해야 해요</p>
-
-            <!-- Body: Timeline + Char -->
-            <div class="delivery-body">
-                <div class="timeline-container">
-                    <div class="timeline-item passed">
-                        <div class="timeline-dot"></div>
-                        <span class="status-text">이동</span>
-                        <span class="time-label">↑ ↓ ← →</span>
-                    </div>
-                    <div class="timeline-item passed">
-                        <div class="timeline-dot"></div>
-                        <span class="status-text">점프</span>
-                        <span class="time-label">space</span>
-                    </div>
-                    <div class="timeline-item active">
-                        <div class="timeline-dot"></div>
-                        <span class="status-text">시점 전환</span>
-                        <span class="time-label">tab</span>
-                    </div>
-                    <div class="timeline-item future">
-                        <div class="timeline-dot"></div>
-                        <span class="status-text">배달완료</span>
-                    </div>
-                </div>
-
-                <div class="character-display">
-                    <span style="transform: translateY(-120px);">🛵</span>
-                </div>
-            </div>
-
-            <!-- Start Button -->
-            <button id="start-btn" class="modal-btn">배달 출발하기</button>
-        </div>
-    </div>
-
-    <div id="timer-ui">남은 시간: <span id="time-left">180.0</span>초</div>
-
-    <div id="game-result-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="character-icon" style="font-size: 50px;">🛵</div>
-            <h2 id="result-title">0초 만에 배달이 완료되었어요</h2>
-            <p class="result-desc">
-                주문하신 메뉴는 어떠셨어요?<br>
-                다른 분들을 위해 리뷰를 남겨보세요
-            </p>
-            <button id="confirm-btn" class="modal-btn">확인</button>
-        </div>
-    </div>
-
-    <div id="game-over-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="character-icon" style="font-size: 50px;">💥</div>
-            <h2>배달에 실패했어요!</h2>
-            <p class="result-desc">
-                발을 헛디뎌 떨어졌습니다.<br>
-                다시 시도해보세요.
-            </p>
-            <button id="retry-btn" class="modal-btn">다시하기</button>
-        </div>
-    </div>
-
-    <div id="timeout-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="character-icon" style="font-size: 50px;">⏰</div>
-            <h2>주문이 취소되었어요!</h2>
-            <p class="result-desc">
-                배달 시간이 3분을 초과하여<br>
-                고객님이 주문을 취소했습니다.
-            </p>
-            <button id="timeout-retry-btn" class="modal-btn">다시하기</button>
-        </div>
-    </div>
-</body>
-
-</html>
+};
