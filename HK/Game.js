@@ -23,6 +23,7 @@ export class Game {
 
         this.colliders = []; // Centralized colliders array
 
+        this.isGameStarted = false; // Add game start flag
         this.isGameOver = false;
         this.startTime = Date.now();
         this.tempColor = new THREE.Color();
@@ -36,7 +37,9 @@ export class Game {
             timeoutModal: document.getElementById('timeout-modal'),
             timeoutRetryBtn: document.getElementById('timeout-retry-btn'),
             timeLeftSpan: document.getElementById('time-left'),
-            timerUi: document.getElementById('timer-ui')
+            timerUi: document.getElementById('timer-ui'),
+            startModal: document.getElementById('start-modal'),
+            startBtn: document.getElementById('start-btn')
         };
 
         this.setupLights();
@@ -86,16 +89,20 @@ export class Game {
             this.ui.timeoutModal.style.display = 'none';
             this.resetGame();
         });
-        // this.ui.startBtn.addEventListener('click', () => {
-        //     this.ui.startModal.style.display = 'none';
-        //     this.isGameStarted = true;
-        //     this.startTime = Date.now();
-        // });
+
+        this.ui.startBtn.addEventListener('click', () => {
+            this.ui.startModal.style.display = 'none';
+            this.isGameStarted = true;
+            this.startTime = Date.now();
+        });
     }
 
     async init() {
         try {
             console.log("Loading assets...");
+
+            // Initial render to show background color while loading
+            this.renderer.render(this.scene, this.cameraManager.activeCamera);
 
             // Initialize Map (Loads objects and apartments)
             // Pass assetManager.loader and colliders array
@@ -107,10 +114,13 @@ export class Game {
             this.weatherSystem.init(this.assetManager, weatherZones, weatherFloors, weatherClouds, invisibleObstacles);
 
             // Load Character
-            const charGltf = await this.assetManager.loadGLTF('../assets/Character.glb');
+            const charGltf = await this.assetManager.loadGLTF('./assets/Character.glb');
             this.player.setMesh(charGltf.scene);
 
-            console.log("Game Started");
+            console.log("Game Loaded");
+            this.ui.startBtn.innerText = "배달 출발하기";
+            this.ui.startBtn.disabled = false;
+
             this.render();
         } catch (error) {
             console.error("Failed to initialize game:", error);
@@ -120,6 +130,12 @@ export class Game {
 
     render() {
         if (!this.player.mesh) return;
+
+        if (!this.isGameStarted) {
+            this.renderer.render(this.scene, this.cameraManager.activeCamera);
+            requestAnimationFrame(this.render);
+            return;
+        }
 
         if (this.isGameOver) {
             this.renderer.render(this.scene, this.cameraManager.activeCamera);
@@ -150,7 +166,7 @@ export class Game {
             const endTime = Date.now();
             const timeTaken = ((endTime - this.startTime) / 1000).toFixed(1);
 
-            this.ui.resultTitle.innerText = `${timeTaken}초 만에 배달이 완료되었어요`;
+            this.ui.resultTitle.innerHTML = `<span class="highlight-time">${timeTaken}초</span> 만에 배달이 완료되었어요`;
             this.ui.resultModal.style.display = 'flex';
             this.isGameOver = true;
         }
@@ -223,4 +239,3 @@ export class Game {
         });
     }
 }
-
