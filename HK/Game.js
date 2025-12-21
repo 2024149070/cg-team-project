@@ -86,6 +86,11 @@ export class Game {
             this.ui.timeoutModal.style.display = 'none';
             this.resetGame();
         });
+        this.ui.startBtn.addEventListener('click', () => {
+            this.ui.startModal.style.display = 'none';
+            this.isGameStarted = true;
+            this.startTime = Date.now();
+        });
     }
 
     async init() {
