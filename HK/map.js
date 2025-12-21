@@ -720,7 +720,7 @@ const weatherZones1 = [
         size: { x: 20, y: 10, z: 10 }
     }
 ];
-const trafficPositions1 = [{ x: 40 + nextX - startfloorX1, y: 0, z: 0 }];
+const trafficPositions1 = [{ x: 36 + nextX - startfloorX1, y: 0, z: 0 }];
 
 const globalStepPosition1 = [];
 const globalbigWallPosition1 = [];
@@ -800,6 +800,7 @@ floorPositions.push({x: nextX, y: 0 , z:0});
 
 floorPositions.push({x: nextX+4, y: 0 , z:0});
 const goalPosition = { x: nextX, y: 0.7, z: 0 };
+
 
 
 
