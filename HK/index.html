@@ -159,6 +159,26 @@
             <button id="timeout-retry-btn" class="modal-btn">다시하기</button>
         </div>
     </div>
+    <div id="warning-msg" style="
+        position: fixed;
+        top: 30%;
+        left: 50%;
+        transform: translateX(-50%);
+        
+        color: #ff5555; /* 연한 빨간색 */
+        font-family: 'Arial Black', sans-serif; /* 두꺼운 폰트 */
+        font-size: 28px; /* 글자 크기 키움 */
+        font-weight: 900; /* 아주 두껍게 */
+        text-align: center;
+        
+        /* 핵심: 배경 없이 글자 강조를 위한 그림자 */
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 0, 0, 0.3);
+        
+        z-index: 10000; /* 가장 위에 */
+        pointer-events: none;
+        opacity: 0; /* 기본 숨김 */
+        transition: opacity 0.2s ease-in-out; /* 빠르게 나타남 */
+    "></div>
 </body>
 
 </html>

@@ -1,4 +1,5 @@
 
+import { showWarning } from "./utils.js";
 // 모든 type에 대해 동일한 함수 호출을 할 수 있도록, 파라미터를 동일하게 가져감. 
 export const CollisionHandlers = {
     "floor": (player, object, isOrtho, isCollision) => {
@@ -14,7 +15,8 @@ export const CollisionHandlers = {
     },
     "traffic_zone": (player, object, isOrtho, isCollision) => {
         if (!isOrtho && isCollision) {
-            resolveCollision(player, object, isOrtho);
+            resolveLeftBarrierCollision(player,object,isOrtho);
+            showWarning("빨간불! 건널 수 없습니다!");
         }
     },
     "step": (player, object, isOrtho, isCollision) => {
@@ -124,6 +126,33 @@ function resolveCollision(playerMesh, objectMesh, isOrtho) {
     } else if (minOverlap === overlapZ) {
         playerMesh.position.z += (playerMesh.position.z < objectMesh.position.z) ? -overlapZ : overlapZ;
     }
+    playerMesh.updateMatrixWorld();
+    playerMesh.bbox.setFromObject(playerMesh);
+}
+
+function resolveLeftBarrierCollision(playerMesh, objectMesh, isOrtho) {
+    const playerBox = playerMesh.bbox;
+    const objectBox = objectMesh.bbox;
+
+    // 1. 플레이어의 X축 반지름(절반 크기) 계산
+    // (플레이어 중심을 object.min.x에 두면 몸 절반이 파묻히므로, 반지름만큼 더 빼줘야 함)
+    const playerRadiusX = (playerBox.max.x - playerBox.min.x) / 2;
+
+    // 2. 겹침 계산 (기존과 동일)
+    const overlapX = Math.min(playerBox.max.x, objectBox.max.x) - Math.max(playerBox.min.x, objectBox.min.x);
+    const overlapY = Math.min(playerBox.max.y, objectBox.max.y) - Math.max(playerBox.min.y, objectBox.min.y);
+    let overlapZ = Math.min(playerBox.max.z, objectBox.max.z) - Math.max(playerBox.min.z, objectBox.min.z);
+    overlapZ = isOrtho ? Infinity : overlapZ;
+
+    const minOverlap = Math.min(overlapX, overlapY, overlapZ);
+
+    playerMesh.position.x = objectBox.min.x - playerRadiusX - 0.01;
+        
+        // 관성 제거 (벽에 박았으니 X축 속도가 죽어야 자연스러움)
+    if(playerMesh.momentumX) playerMesh.momentumX = 0; // momentumX 변수가 있다면
+
+
+    // 위치 변경 후 BBox 갱신 필수
     playerMesh.updateMatrixWorld();
     playerMesh.bbox.setFromObject(playerMesh);
 }
