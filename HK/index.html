@@ -11,7 +11,7 @@
             /* 폰트 전체 적용 */
         }
 
-        /* 팝업창 공통 디자인 */
+        /* 팝업창 공통 디자인 - Delivery App Style */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -27,59 +27,172 @@
 
         .modal-content {
             background-color: white;
-            width: 300px;
-            padding: 30px 20px;
+            width: 380px;
+            /* Slightly wider for the layout */
+            padding: 25px;
             border-radius: 20px;
-            text-align: center;
+            text-align: left;
+            /* Left align for this specific design */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-family: 'Noto Sans KR', sans-serif, Arial;
+            position: relative;
         }
 
-        .character-icon {
-            font-size: 50px;
-            margin-bottom: 10px;
+        /* Delivery Badge */
+        .badge-alddle {
+            display: inline-block;
+            background-color: #E6F7FF;
+            color: #2AC1BC;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            margin-bottom: 12px;
         }
 
-        .modal-content h2 {
-            font-size: 20px;
-            /* 제목 크기 약간 키움 */
+        /* Header Text */
+        .arrival-time {
+            font-size: 26px;
+            font-weight: 800;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 4px;
+        }
+
+        .sub-text {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* Body Layout */
+        .delivery-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        /* Timeline */
+        .timeline-container {
+            flex: 1;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        /* The vertical line */
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 8px;
+            bottom: 25px;
+            width: 2px;
+            background-color: #E0E0E0;
+            z-index: 0;
+        }
+
+        /* Active line segment (Green) - Simulating progress */
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 8px;
+            height: 60%;
+            /* Adjust based on 'Delivering' position */
+            width: 2px;
+            background-color: #2AC1BC;
+            z-index: 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1;
+            font-size: 15px;
+            color: #888;
+        }
+
+        .timeline-item.active {
+            color: #333;
             font-weight: bold;
         }
 
-        .result-desc {
-            font-size: 14px;
-            color: #888;
-            line-height: 1.5;
-            margin-bottom: 25px;
+        .timeline-item.future {
+            color: #BBB;
         }
 
-        /* 버튼 공통 스타일 */
+        /* The dot */
+        .timeline-dot {
+            position: absolute;
+            left: -15px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #E0E0E0;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px white;
+            /* Cleaner spacing from line */
+        }
+
+        .timeline-item.passed .timeline-dot,
+        .timeline-item.active .timeline-dot {
+            background-color: #2AC1BC;
+        }
+
+        .time-label {
+            font-size: 13px;
+            color: #999;
+            margin-left: auto;
+            /* Push to right */
+        }
+
+        /* Character Image Area */
+        .character-display {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            animation: bounce 2s infinite;
+        }
+
+        /* Button override */
         .modal-btn {
-            background-color: white;
-            border: 1px solid #ddd;
-            padding: 10px 40px;
+            width: 100%;
+            background-color: #2AC1BC;
+            /* Mint color */
+            color: white;
+            border: none;
+            padding: 15px 0;
             border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
-            font-size: 16px;
-            color: #333;
-            transition: background-color 0.2s;
+            margin-top: 10px;
         }
 
         .modal-btn:hover {
-            background-color: #f5f5f5;
+            background-color: #25A8A3;
         }
 
-        /* 실패 버튼 강조 (선택사항) */
-        #retry-btn {
-            border-color: #ff6b6b;
-            color: #ff6b6b;
+        /* Keyframes */
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
         }
 
-        #retry-btn:hover {
-            background-color: #fff0f0;
-        }
-
+        /* Existing UI adjustments */
         #timer-ui {
             position: fixed;
             top: 20px;
@@ -108,6 +221,62 @@
                 opacity: 0.5;
             }
         }
+
+        #warning-msg {
+            position: fixed;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #ff4444;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            z-index: 2000;
+        }
+
+        #warning-msg.show {
+            opacity: 1;
+        }
+
+        /* Result Modal Styles */
+        .highlight-time {
+            color: #2ac1bc;
+            /* Main Mint Color */
+            font-weight: bold;
+        }
+
+        #game-result-modal .modal-content {
+            padding-bottom: 0;
+            overflow: hidden;
+        }
+
+        #game-result-modal .modal-btn {
+            width: 100%;
+            border: none;
+            border-top: 1px solid #eee;
+            border-radius: 0;
+            padding: 20px 0;
+            margin: 0;
+            background: white;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 20px;
+            /* Make it look like a bottom attached button inside the modal */
+            margin-left: -20px;
+            margin-right: -20px;
+            width: calc(100% + 40px);
+            cursor: pointer;
+        }
+
+        #game-result-modal .modal-btn:hover {
+            background-color: #f8f8f8;
+        }
     </style>
 
     <script type="importmap">
@@ -122,12 +291,56 @@
 </head>
 
 <body>
-    <div id="timer-ui">남은 시간: <span id="time-left">30.0</span>초</div>
+    <div id="warning-msg">빨간불이에요. 건너면 안돼요!</div>
+    <div id="start-modal" class="modal-overlay">
+        <div class="modal-content">
+            <!-- Badge -->
+            <div class="badge-alddle">한집배달</div>
+
+            <!-- Header -->
+            <h2 class="arrival-time">3분 이내 도착 예정</h2>
+            <p class="sub-text">목적지에 빨리 도착해야 해요</p>
+
+            <!-- Body: Timeline + Char -->
+            <div class="delivery-body">
+                <div class="timeline-container">
+                    <div class="timeline-item passed">
+                        <div class="timeline-dot"></div>
+                        <span class="status-text">이동</span>
+                        <span class="time-label">↑ ↓ ← →</span>
+                    </div>
+                    <div class="timeline-item passed">
+                        <div class="timeline-dot"></div>
+                        <span class="status-text">점프</span>
+                        <span class="time-label">space</span>
+                    </div>
+                    <div class="timeline-item active">
+                        <div class="timeline-dot"></div>
+                        <span class="status-text">시점 전환</span>
+                        <span class="time-label">tab</span>
+                    </div>
+                    <div class="timeline-item future">
+                        <div class="timeline-dot"></div>
+                        <span class="status-text">배달완료</span>
+                    </div>
+                </div>
+
+                <div class="character-display">
+                    <span style="transform: translateY(-120px);">🛵</span>
+                </div>
+            </div>
+
+            <!-- Start Button -->
+            <button id="start-btn" class="modal-btn">배달 출발하기</button>
+        </div>
+    </div>
+
+    <div id="timer-ui">남은 시간: <span id="time-left">180.0</span>초</div>
 
     <div id="game-result-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
-            <div class="character-icon">🛵</div>
-            <h2 id="result-title">0초 만에 배달이 완료되었어요</h2>
+            <div class="character-icon" style="font-size: 80px; margin-bottom: 0;">😋</div>
+            <h2 id="result-title" style="font-size: 18px; margin: 10px 0;">0초 만에 배달이 완료되었어요</h2>
             <p class="result-desc">
                 주문하신 메뉴는 어떠셨어요?<br>
                 다른 분들을 위해 리뷰를 남겨보세요
@@ -138,7 +351,7 @@
 
     <div id="game-over-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
-            <div class="character-icon">💥</div>
+            <div class="character-icon" style="font-size: 50px;">💥</div>
             <h2>배달에 실패했어요!</h2>
             <p class="result-desc">
                 발을 헛디뎌 떨어졌습니다.<br>
@@ -150,10 +363,10 @@
 
     <div id="timeout-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
-            <div class="character-icon">⏰</div>
+            <div class="character-icon" style="font-size: 50px;">⏰</div>
             <h2>주문이 취소되었어요!</h2>
             <p class="result-desc">
-                배달 시간이 30초를 초과하여<br>
+                배달 시간이 3분을 초과하여<br>
                 고객님이 주문을 취소했습니다.
             </p>
             <button id="timeout-retry-btn" class="modal-btn">다시하기</button>
