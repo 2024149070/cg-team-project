@@ -331,7 +331,7 @@
             </div>
 
             <!-- Start Button -->
-            <button id="start-btn" class="modal-btn">배달 출발하기</button>
+            <button id="start-btn" class="modal-btn" disabled>로딩 중...</button>
         </div>
     </div>
 
@@ -351,8 +351,8 @@
 
     <div id="game-over-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
-            <div class="character-icon" style="font-size: 50px;">💥</div>
-            <h2>배달에 실패했어요!</h2>
+            <div class="character-icon" style="font-size: 80px; margin-bottom: 0;">💥</div>
+            <h2 style="font-size: 18px; margin: 10px 0;">배달에 실패했어요!</h2>
             <p class="result-desc">
                 발을 헛디뎌 떨어졌습니다.<br>
                 다시 시도해보세요.
@@ -363,8 +363,8 @@
 
     <div id="timeout-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
-            <div class="character-icon" style="font-size: 50px;">⏰</div>
-            <h2>주문이 취소되었어요!</h2>
+            <div class="character-icon" style="font-size: 80px; margin-bottom: 0;">⏰</div>
+            <h2 style="font-size: 18px; margin: 10px 0;">주문이 취소되었어요!</h2>
             <p class="result-desc">
                 배달 시간이 3분을 초과하여<br>
                 고객님이 주문을 취소했습니다.
@@ -372,26 +372,6 @@
             <button id="timeout-retry-btn" class="modal-btn">다시하기</button>
         </div>
     </div>
-    <div id="warning-msg" style="
-        position: fixed;
-        top: 30%;
-        left: 50%;
-        transform: translateX(-50%);
-        
-        color: #ff5555; /* 연한 빨간색 */
-        font-family: 'Arial Black', sans-serif; /* 두꺼운 폰트 */
-        font-size: 28px; /* 글자 크기 키움 */
-        font-weight: 900; /* 아주 두껍게 */
-        text-align: center;
-        
-        /* 핵심: 배경 없이 글자 강조를 위한 그림자 */
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 0, 0, 0.3);
-        
-        z-index: 10000; /* 가장 위에 */
-        pointer-events: none;
-        opacity: 0; /* 기본 숨김 */
-        transition: opacity 0.2s ease-in-out; /* 빠르게 나타남 */
-    "></div>
 </body>
 
 </html>
