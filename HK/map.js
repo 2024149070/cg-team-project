@@ -485,7 +485,7 @@ for (let i = 0; i < 15; i++) {
     conePositions1.push({
         x: 60 + 10 * Math.random(),
         y: 0.4, // Adjusted for smaller scale
-        z: -4.5 + 10 * Math.random()
+        z: -4.5 + 10 * Math.random(),
         scaleY: 2
     });
 }
@@ -493,7 +493,7 @@ for (let i = 0; i < 9; i++) {
     conePositions1.push({
         x: 91.5 + i,
         y: 0.4, // Adjusted for smaller scale
-        z: -4.5 + i
+        z: -4.5 + i,
         scaleY: 2
     });
 }
@@ -501,7 +501,7 @@ for (let i = 0; i < 7; i++) {
     conePositions1.push({
         x: 91.5 + i,
         y: 0.4, // Adjusted for smaller scale
-        z: -1.5 + i
+        z: -1.5 + i,
         scaleY: 2
     });
 }
@@ -509,7 +509,7 @@ for (let i = 0; i < 8; i++) {
     conePositions1.push({
         x: 100.5 + i,
         y: 0.4, // Adjusted for smaller scale
-        z: 2.5 - i
+        z: 2.5 - i,
         scaleY: 2
     });
 }
@@ -517,7 +517,7 @@ for (let i = 0; i < 9; i++) {
     conePositions1.push({
         x: 101.5 + i,
         y: 0.4, // Adjusted for smaller scale
-        z: 4.5 - i
+        z: 4.5 - i,
         scaleY: 2
     });
 }
@@ -800,6 +800,7 @@ floorPositions.push({x: nextX, y: 0 , z:0});
 
 floorPositions.push({x: nextX+4, y: 0 , z:0});
 const goalPosition = { x: nextX, y: 0.7, z: 0 };
+
 
 
 
