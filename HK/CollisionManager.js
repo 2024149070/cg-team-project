@@ -16,7 +16,7 @@ export const CollisionHandlers = {
     "traffic_zone": (player, object, isOrtho, isCollision) => {
         if (!isOrtho && isCollision) {
             resolveLeftBarrierCollision(player,object,isOrtho);
-            showWarning("빨간불! 건널 수 없습니다!");
+            showWarning("빨간불이에요. 건너면 안돼요!");
         }
     },
     "step": (player, object, isOrtho, isCollision) => {
