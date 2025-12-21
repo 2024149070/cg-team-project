@@ -445,7 +445,7 @@ const floorPositions1 = [
     { x: 8, y: 0, z: 0 }, { x: 12, y: 0, z: 0 }, { x: 16, y: 0, z: 0 },
     { x: 20, y: 0, z: 0 }, { x: 24, y: 0, z: 0 }, { x: 28, y: 0, z: 0 },
     { x: 32, y: 0, z: 0 }, { x: 36, y: 0, z: 0 }, { x: 40, y: 0, z: 0 },
-    { x: 44, y: 0, z: 0 }, { x: 47, y: 0, z: 0 }, { x: 52, y: 0, z: 0 },
+    { x: 44, y: 0, z: 0 }, //{ x: 47, y: 0, z: 0 }, { x: 52, y: 0, z: 0 },
     { x: 56, y: 0, z: 0 }, { x: 60, y: 0, z: 0 }, { x: 64, y: 0, z: 0 },
     { x: 68, y: 0, z: 0 }, { x: 72, y: 0, z: 0 }, { x: 76, y: 0, z: 0 },
     { x: 80, y: 0, z: 0 }, { x: 84, y: 0, z: 0 }, { x: 88, y: 0, z: 0 },
@@ -475,7 +475,7 @@ const bigWallPosition1 = [{ x: 80, y: 2.5, z: 0 }];
 
 const APTPositions1 = [
     { x: -2, y: 1.8, z: 0 }, { x: 6, y: 1.8, z: -3 }, { x: 10, y: 1.8, z: 2 },
-    { x: 25, y: 1.8, z: 2 }, { x: 56, y: 1.8, z: 2 },
+    { x: 25, y: 1.8, z: 2 }, { x: 44, y: 1.8, z: -4 }, { x: 56, y: 1.8, z: 2 },
 
     { x: 8, y: 1.8, z: -17 }, { x: 12, y: 1.8, z: -14 }
 ];
@@ -485,35 +485,40 @@ for (let i = 0; i < 15; i++) {
     conePositions1.push({
         x: 60 + 10 * Math.random(),
         y: 0.4, // Adjusted for smaller scale
-        z: -4.5 + 10 * Math.random()
+        z: -4.5 + 10 * Math.random(),
+        scaleY: 2
     });
 }
 for (let i = 0; i < 9; i++) {
     conePositions1.push({
         x: 91.5 + i,
         y: 0.4, // Adjusted for smaller scale
-        z: -4.5 + i
+        z: -4.5 + i,
+        scaleY: 2
     });
 }
 for (let i = 0; i < 7; i++) {
     conePositions1.push({
         x: 91.5 + i,
         y: 0.4, // Adjusted for smaller scale
-        z: -1.5 + i
+        z: -1.5 + i,
+        scaleY: 2
     });
 }
 for (let i = 0; i < 8; i++) {
     conePositions1.push({
         x: 100.5 + i,
         y: 0.4, // Adjusted for smaller scale
-        z: 2.5 - i
+        z: 2.5 - i,
+        scaleY: 2
     });
 }
 for (let i = 0; i < 9; i++) {
     conePositions1.push({
         x: 101.5 + i,
         y: 0.4, // Adjusted for smaller scale
-        z: 4.5 - i
+        z: 4.5 - i,
+        scaleY: 2
     });
 }
 const wallPositions1 = [
@@ -539,6 +544,13 @@ for (let i = 0; i < 13; i++) {
         y: 0 + 7 * 1.5,
         z: -18
     });
+}
+for (let i = 0; i < 3; i++) {
+    invPositions1.push({
+        x: 48 + i * 2,
+        y: 0 + i * 1.5,
+        z: 3 * Math.pow(-1, i)
+    })
 }
 
 const floorPositions2 = [
@@ -788,3 +800,7 @@ floorPositions.push({x: nextX, y: 0 , z:0});
 
 floorPositions.push({x: nextX+4, y: 0 , z:0});
 const goalPosition = { x: nextX, y: 0.7, z: 0 };
+
+
+
+
