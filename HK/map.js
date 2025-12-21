@@ -445,7 +445,7 @@ const floorPositions1 = [
     { x: 8, y: 0, z: 0 }, { x: 12, y: 0, z: 0 }, { x: 16, y: 0, z: 0 },
     { x: 20, y: 0, z: 0 }, { x: 24, y: 0, z: 0 }, { x: 28, y: 0, z: 0 },
     { x: 32, y: 0, z: 0 }, { x: 36, y: 0, z: 0 }, { x: 40, y: 0, z: 0 },
-    { x: 44, y: 0, z: 0 }, { x: 47, y: 0, z: 0 }, { x: 52, y: 0, z: 0 },
+    { x: 44, y: 0, z: 0 }, //{ x: 47, y: 0, z: 0 }, { x: 52, y: 0, z: 0 },
     { x: 56, y: 0, z: 0 }, { x: 60, y: 0, z: 0 }, { x: 64, y: 0, z: 0 },
     { x: 68, y: 0, z: 0 }, { x: 72, y: 0, z: 0 }, { x: 76, y: 0, z: 0 },
     { x: 80, y: 0, z: 0 }, { x: 84, y: 0, z: 0 }, { x: 88, y: 0, z: 0 },
@@ -539,6 +539,13 @@ for (let i = 0; i < 13; i++) {
         y: 0 + 7 * 1.5,
         z: -18
     });
+}
+for (let i = 0; i < 3; i++) {
+    invPositions1.push({
+        x: 48 + i * 2,
+        y: 0 + i * 1.5,
+        z: 3 * Math.pow(-1, i)
+    })
 }
 
 const floorPositions2 = [
@@ -788,3 +795,4 @@ floorPositions.push({x: nextX, y: 0 , z:0});
 
 floorPositions.push({x: nextX+4, y: 0 , z:0});
 const goalPosition = { x: nextX, y: 0.7, z: 0 };
+
