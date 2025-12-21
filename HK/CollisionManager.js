@@ -15,6 +15,7 @@ export const CollisionHandlers = {
     "traffic_zone": (player, object, isOrtho, isCollision) => {
         if (!isOrtho && isCollision) {
             resolveCollision(player, object, isOrtho);
+            showTrafficWarning();
         }
     },
     "step": (player, object, isOrtho, isCollision) => {
@@ -126,4 +127,24 @@ function resolveCollision(playerMesh, objectMesh, isOrtho) {
     }
     playerMesh.updateMatrixWorld();
     playerMesh.bbox.setFromObject(playerMesh);
+}
+
+let warningTimeout;
+function showTrafficWarning() {
+    const warningMsg = document.getElementById('warning-msg');
+    if (!warningMsg) return;
+
+    // 이미 떠 있으면 시간만 연장 (혹은 깜빡임 효과를 위해 리셋)
+    // 여기서는 단순히 클래스 추가/제거
+
+    // 만약 Debounce가 필요하다면:
+    // if (warningMsg.classList.contains('show')) return; 
+
+    warningMsg.classList.add('show');
+
+    if (warningTimeout) clearTimeout(warningTimeout);
+
+    warningTimeout = setTimeout(() => {
+        warningMsg.classList.remove('show');
+    }, 1000);
 }
