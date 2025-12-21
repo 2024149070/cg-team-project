@@ -1,14 +1,7 @@
 import * as THREE from 'three';
 import { traffic_light_zone } from './traffic_light_zone.js';
 
-export const weatherZones = [
-    {
-        type: 'RAIN',
-        position: { x: 60, y: 5, z: 0 },
-        size: { x: 10, y: 10, z: 10 }
-    },
 
-];
 
 export const weatherFloors = [];
 export const weatherClouds = [];
@@ -17,7 +10,7 @@ export const invisibleObstacles = []; // Will be populated with 'inv' objects
 // These are kept for compatibility if needed, but will be empty or unused
 export const floors = [];
 export const obstacles = [];
-export const goal = { position: { x: 80, y: 0.7, z: 0 } }; // HK defines goal position locally, but Game.js uses it for distance check
+export const goal = { position: { x: 120, y: 0.7, z: 0 } }; // HK defines goal position locally, but Game.js uses it for distance check
 export const pillars = [];
 export const pillarPositions = [];
 export const steps = [];
@@ -26,25 +19,32 @@ export const bigwalls = [];
 // loader, scene, colliders 배열을 인자로 받습니다.
 export async function initMap(loader, scene, colliders) {
     console.log("맵 생성 시작");
+    for (const pos of trafficPositions) {
+        await traffic_light_zone(scene, loader, pos, colliders);
+    }
 
-     await traffic_light_zone(scene, loader, { x: -4, y: 0, z: 0 }, colliders);
 
     await createFloors(loader, scene, floorPositions, colliders);
 
-     await createStepPair(loader, scene, stepPositions, bigWallPosition, colliders);
-     
-     await createStepPair(loader, scene, stepPositions2, bigWallPosition2, colliders);
 
+    await createStepPair(loader, scene, globalStepPosition1, globalbigWallPosition1[0], colliders);
+    await createStepPair(loader, scene, globalStepPosition21, globalbigWallPosition21[0], colliders);
+    await createStepPair(loader, scene, globalStepPosition22, globalbigWallPosition22[0], colliders);
+    await createStepPair(loader, scene, globalStepPosition31, globalbigWallPosition31[0], colliders);
+    await createStepPair(loader, scene, globalStepPosition32, globalbigWallPosition32[0], colliders);
 
     await createAPT(loader, scene, APTPositions, colliders);
 
     await createCones(loader, scene, conePositions, colliders);
 
-    createGoal(scene, goalPosition, colliders);
+    await createGoal(loader, scene, goalPosition, colliders);
 
     createWall(scene, wallPositions, colliders);
 
-    createRamp(scene, rampPositions, rampSizes[0], colliders);
+    createRamp(scene, [rampPositions[0]], rampSize[0], colliders);
+    createRamp(scene, [rampPositions[1]], rampSize[1], colliders);
+    createRamp(scene, [rampPositions[2]], rampSize[2], colliders);
+
     createInv(scene, invPositions, colliders);
 
     // Initialize Weather Visuals (Clouds, SnowFloor) - Integrated from old map.js
@@ -95,17 +95,6 @@ export async function initMap(loader, scene, colliders) {
 
 // 바닥 생성
 const floorPositions = [
-    { x: -16, y: 0, z: 0 }, { x: -12, y: 0, z: 0 }, { x: -8, y: 0, z: 0 },
-     { x: -4, y: 0, z: 0 }, { x: 0, y: 0, z: 0}, { x: 4, y: 0, z: 0},
-     { x: 8, y: 0, z: 0 }, { x: 12, y: 0, z: 0 }, { x: 16, y: 0, z: 0 },
-     { x: 20, y: 0, z: 0 }, { x: 24, y: 0, z: 0 }, { x: 28, y: 0, z: 0 },
-     { x: 32, y: 0, z: 0 }, { x: 36, y: 0, z: 0 }, { x: 40, y: 0, z: 0 },
-     { x: 44, y: 0, z: 0 }, { x: 48, y: 0, z: 0 }, { x: 52, y: 0, z: 0 },
-     { x: 56, y: 0, z: 0 }, { x: 60, y: 0, z: 0 }, { x: 64, y: 0, z: 0 },
-     { x: 68, y: 0, z: 0 }, { x: 72, y: 0, z: 0 }, { x: 76, y: 0, z: 0 }, 
-     { x: 80, y: 0, z: 0 }, { x: 84, y: 0, z: 0 }, { x: 88, y: 0, z: 0 },
-     { x: 92, y: 0, z: 0 }, { x: 96, y: 0, z: 0 }, { x: 100, y: 0, z: 0 },
-
 ];
 
 async function loadFloor(loader) {
@@ -146,14 +135,9 @@ async function createFloors(loader, scene, positions, colliders) {
 
 // 발판 기믹 생성.
 const stepPositions = [
-    { x: 33, y: 0.2, z: -2 }, { x: 34, y: 0.2, z: 3 }
+    { x: 75, y: 0.2, z: -2 }, { x: 76, y: 0.2, z: 3 }
 ]
-const bigWallPosition = { x: 37, y: 2.5, z: 0 };
-
-const stepPositions2 = [
-    { x: 74, y: 0.2, z: -2 }, { x: 75, y: 0.2, z: 3 }
-]
-const bigWallPosition2 = { x: 79, y: 2.5, z: 0 };
+const bigWallPosition = { x: 80, y: 2.5, z: 0 };
 
 async function createStepPair(loader, scene, stepPositions, wallPosition, colliders) {
     const stepGeometry = new THREE.BoxGeometry(1, 0.2, 1);
@@ -214,8 +198,6 @@ async function createStepPair(loader, scene, stepPositions, wallPosition, collid
 
 //건물 생성.
 const APTPositions = [
-     { x: 13, y: 1.8, z: 0 }, { x: 15, y: 1.8, z: -3 }, { x: 20, y: 1.8, z: 2 },
-     { x: 50, y: 1.8, z: 2 },{ x: 76, y: 1.8, z: -4 }, { x: 84, y: 1.8, z: 3 }
 
 ];
 async function createAPT(loader, scene, positions, colliders) {
@@ -234,6 +216,18 @@ async function createAPT(loader, scene, positions, colliders) {
         positions.forEach((pos) => {
             const apartment = template.clone(true);
 
+            apartment.scale.set(
+                pos.scaleX ?? 1,
+                pos.scaleY ?? 1,
+                pos.scaleZ ?? 1
+            );
+
+            apartment.rotation.set(
+                pos.rotX ?? 0,
+                pos.rotY ?? 0,
+                pos.rotZ ?? 0
+            )
+
             apartment.position.set(pos.x, pos.y, pos.z);
             apartment.userData.originalZ = apartment.position.z;
             apartment.bbox = new THREE.Box3().setFromObject(apartment);
@@ -248,17 +242,7 @@ async function createAPT(loader, scene, positions, colliders) {
 }
 
 // 콘 생성
-const conePositions = [
-    { x: 6, y: 0.3, z: -1, },
-    { x: 10, y: 0.3, z: 4},
-    { x: 50, y: 0.3, z: -4},
-    { x: 58, y: 0.3, z: -4, scaleX:2,scaleY:2,scaleZ:2},
-    { x: 58, y: 0.3, z: -2, scaleX:2,scaleY:2,scaleZ:2},
-    { x: 58, y: 0.3, z: 0, scaleX:2,scaleY:2,scaleZ:2},
-    { x: 58, y: 0.3, z: 2, scaleX:2,scaleY:2,scaleZ:2},
-    { x: 58, y: 0.3, z: 4, scaleX:2,scaleY:2,scaleZ:2},
-
-];
+const conePositions = [];
 
 
 async function createCones(loader, scene, positions, collider) {
@@ -276,13 +260,13 @@ async function createCones(loader, scene, positions, collider) {
         positions.forEach((pos) => {
             const cone = template.clone(true);
 
+            cone.position.set(pos.x, pos.y, pos.z);
+
             cone.scale.set(
                 (pos.scaleX ?? 1) * 0.5,
                 (pos.scaleY ?? 1) * 0.5,
                 (pos.scaleZ ?? 1) * 0.5
             );
-            cone.position.set(pos.x, pos.y, pos.z);
-
             cone.updateMatrixWorld(true);
             cone.bbox = new THREE.Box3().setFromObject(cone);
 
@@ -298,8 +282,6 @@ async function createCones(loader, scene, positions, collider) {
 
 // 벽 생성
 const wallPositions = [
-    { x: 54, y: 1.5, z: 4, scaleZ: 0.5,  rotX:0, rotY: Math.PI/2, rotZ:0 },
-    {x:88,y:1.5,z:0}
 ];
 
 function createWall(scene, positions, colliders) {
@@ -308,7 +290,6 @@ function createWall(scene, positions, colliders) {
 
     positions.forEach(pos => {
         const wall = new THREE.Mesh(wallGeometry, wallMaterial);
-        wall.position.set(pos.x, pos.y, pos.z);
 
         wall.scale.set(
             pos.scaleX ?? 1,
@@ -321,10 +302,11 @@ function createWall(scene, positions, colliders) {
             pos.rotY ?? 0,
             pos.rotZ ?? 0
         )
+
+        wall.position.set(pos.x, pos.y, pos.z);
         wall.userData.originalZ = wall.position.z;
         wall.geometry.computeBoundingBox();
         wall.bbox = new THREE.Box3().setFromObject(wall);
-
         wall.userData.type = 'obstacle';
         scene.add(wall);
 
@@ -334,12 +316,7 @@ function createWall(scene, positions, colliders) {
 }
 
 // 경사로 생성.
-const rampPositions = [
-     { x: 62, y: 0.2, z: 3, }
-];
-const rampSizes = [{ length: 10, height: 5, width: 3 }]
-
-
+const rampPositions = [];
 function createRamp(scene, positions, size, colliders) {
     // size = { length: X축 길이, height: Y축 높이, width: Z축 폭 }
     const { length, height, width } = size;
@@ -400,23 +377,36 @@ function createRamp(scene, positions, size, colliders) {
 }
 
 // goal 생성
-const goalPosition = { x: 100, y: 0.7, z: 0 };
-function createGoal(scene, position, colliders) {
-    const goalGeometry = new THREE.IcosahedronGeometry(0.5, 0);
-    const goalMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
-    const goalMesh = new THREE.Mesh(goalGeometry, goalMaterial);
+async function createGoal(loader, scene, pos, colliders) {
+    try {
+        const gltf = await loader.loadAsync('../assets/goal_house.glb');
+        const template = gltf.scene;
 
-    goalMesh.position.set(position.x, position.y, position.z);
+        template.traverse((obj) => {
+            if (obj.isMesh) {
+                obj.castShadow = true;
+                obj.receiveShadow = true;
+            }
+        });
 
-    goalMesh.bbox = new THREE.Box3().setFromObject(goalMesh);
+        const goal = template.clone(true);
+        goal.position.set(pos.x, pos.y, pos.z);
+        goal.scale.set(0.5, 0.5, 0.5);
 
-    goalMesh.userData.type = "goal";
-    colliders.push(goalMesh)
-    scene.add(goalMesh);
+        goal.updateMatrixWorld(true);
+        goal.bbox = new THREE.Box3().setFromObject(goal);
+
+        goal.userData.type = 'goal';
+        scene.add(goal);
+        colliders.push(goal);
+        obstacles.push(goal);
+    } catch (err) {
+        console.error('goal load error', err);
+    }
 }
 
-
 const invPositions = [];
+
 
 function createInv(scene, position, colliders) {
     const invGeometry = new THREE.BoxGeometry(2, 0.5, 2);
@@ -446,5 +436,355 @@ function createInv(scene, position, colliders) {
         // HK handles it in 'inv' collision handler (which runs on update).
     });
 
-
 }
+
+const floorPositions1 = [
+    { x: -20, y: 0, z: 0 },
+    { x: -16, y: 0, z: 0 }, { x: -12, y: 0, z: 0 }, { x: -8, y: 0, z: 0 },
+    { x: -4, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }, { x: 4, y: 0, z: 0 },
+    { x: 8, y: 0, z: 0 }, { x: 12, y: 0, z: 0 }, { x: 16, y: 0, z: 0 },
+    { x: 20, y: 0, z: 0 }, { x: 24, y: 0, z: 0 }, { x: 28, y: 0, z: 0 },
+    { x: 32, y: 0, z: 0 }, { x: 36, y: 0, z: 0 }, { x: 40, y: 0, z: 0 },
+    { x: 44, y: 0, z: 0 }, { x: 47, y: 0, z: 0 }, { x: 52, y: 0, z: 0 },
+    { x: 56, y: 0, z: 0 }, { x: 60, y: 0, z: 0 }, { x: 64, y: 0, z: 0 },
+    { x: 68, y: 0, z: 0 }, { x: 72, y: 0, z: 0 }, { x: 76, y: 0, z: 0 },
+    { x: 80, y: 0, z: 0 }, { x: 84, y: 0, z: 0 }, { x: 88, y: 0, z: 0 },
+    { x: 92, y: 0, z: 0 }, { x: 96, y: 0, z: 0 }, { x: 100, y: 0, z: 0 },
+    { x: 104, y: 0, z: 0 }, { x: 108, y: 0, z: 0 }, { x: 112, y: 0, z: 0 },
+    { x: 116, y: 0, z: 0 }, { x: 120, y: 0, z: 0 }, { x: 124, y: 0, z: 0 },
+
+
+    //{ x: -20, y: 0, z: -15 }, { x: -16, y: 0, z: -15 }, { x: -12, y: 0, z: -15 },    
+    //{ x: -8, y: 0, z: -15 }, //{ x: -4, y: 0, z: -15 }, { x: 0, y: 0, z: -15 },
+    //{ x: 4, y: 0, z: -15 },
+    { x: 8, y: 0, z: -15 }, { x: 12, y: 0, z: -15 },
+    //{ x: 16, y: 0, z: -15 }, { x: 20, y: 0, z: -15 }, { x: 24, y: 0, z: -15 },
+    //{ x: 28, y: 0, z: -15 }, { x: 32, y: 0, z: -15 }, { x: 36, y: 0, z: -15 },
+    //{ x: 40, y: 0, z: -15 }, { x: 44, y: 0, z: -15 }, { x: 48, y: 0, z: -15 },
+    //{ x: 52, y: 0, z: -15 }, { x: 56, y: 0, z: -15 }, { x: 60, y: 0, z: -15 },
+    //{ x: 64, y: 0, z: -15 }, { x: 68, y: 0, z: -15 }, { x: 72, y: 0, z: -15 },
+    //{ x: 76, y: 0, z: -15 }, { x: 80, y: 0, z: -15 }, { x: 84, y: 0, z: -15 },
+    //{ x: 88, y: 0, z: -15 }, { x: 92, y: 0, z: -15 }, { x: 96, y: 0, z: -15 },
+    //{ x: 100, y: 0, z: -15 }
+];
+
+const stepPositions1 = [
+    { x: 75, y: 0.2, z: -2 }, { x: 76, y: 0.2, z: 3 }
+]
+const bigWallPosition1 = [{ x: 80, y: 2.5, z: 0 }];
+
+const APTPositions1 = [
+    { x: -2, y: 1.8, z: 0 }, { x: 6, y: 1.8, z: -3 }, { x: 10, y: 1.8, z: 2 },
+    { x: 25, y: 1.8, z: 2 }, { x: 56, y: 1.8, z: 2 },
+
+    { x: 8, y: 1.8, z: -17 }, { x: 12, y: 1.8, z: -14 }
+];
+
+const conePositions1 = [];
+for (let i = 0; i < 15; i++) {
+    conePositions1.push({
+        x: 60 + 10 * Math.random(),
+        y: 0.4, // Adjusted for smaller scale
+        z: -4.5 + 10 * Math.random()
+    });
+}
+for (let i = 0; i < 9; i++) {
+    conePositions1.push({
+        x: 91.5 + i,
+        y: 0.4, // Adjusted for smaller scale
+        z: -4.5 + i
+    });
+}
+for (let i = 0; i < 7; i++) {
+    conePositions1.push({
+        x: 91.5 + i,
+        y: 0.4, // Adjusted for smaller scale
+        z: -1.5 + i
+    });
+}
+for (let i = 0; i < 8; i++) {
+    conePositions1.push({
+        x: 100.5 + i,
+        y: 0.4, // Adjusted for smaller scale
+        z: 2.5 - i
+    });
+}
+for (let i = 0; i < 9; i++) {
+    conePositions1.push({
+        x: 101.5 + i,
+        y: 0.4, // Adjusted for smaller scale
+        z: 4.5 - i
+    });
+}
+const wallPositions1 = [
+    { x: 15, y: 1.75, z: 0 },
+    //{ x: 45.5, y: 1.75, z: -15 }, { x: 46.5, y: 1.75, z: -15 },
+    //{ x: 47.5, y: 1.75, z: -15 }, { x: 48.5, y: 1.75, z: -15 }, { x: 49.5, y: 1.75, z: -15 },
+    //{ x: 50.5, y: 1.75, z: -15 }, { x: 51.5, y: 1.75, z: -15 }, { x: 52.5, y: 1.75, z: -15 }
+];
+const rampPositions1 = [{ x: 90, y: 90, z: 0 }];
+const rampSize1 = [{ length: 5, height: 2, width: 3 }];
+
+const invPositions1 = [];
+for (let i = 0; i < 8; i++) {
+    invPositions1.push({
+        x: -23,
+        y: 0 + i * 1.5,
+        z: -16 + 2 * Math.pow(-1, i)
+    });
+}
+for (let i = 0; i < 13; i++) {
+    invPositions1.push({
+        x: -23 + i * 2,
+        y: 0 + 7 * 1.5,
+        z: -18
+    });
+}
+
+const floorPositions2 = [
+    { x: -16, y: 0, z: 0 }, { x: -12, y: 0, z: 0 }, { x: -8, y: 0, z: 0 },
+    { x: -4, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }, { x: 4, y: 0, z: 0 },
+    { x: 8, y: 0, z: 0 }, { x: 12, y: 0, z: 0 }, { x: 16, y: 0, z: 0 },
+    { x: 20, y: 0, z: 0 }, { x: 24, y: 0, z: 0 }, { x: 28, y: 0, z: 0 },
+    { x: 32, y: 0, z: 0 }, { x: 36, y: 0, z: 0 }, { x: 40, y: 0, z: 0 },
+    { x: 44, y: 0, z: 0 }, { x: 48, y: 0, z: 0 }, { x: 52, y: 0, z: 0 },
+    { x: 56, y: 0, z: 0 }, { x: 60, y: 0, z: 0 }, { x: 64, y: 0, z: 0 },
+    { x: 68, y: 0, z: 0 }, { x: 72, y: 0, z: 0 }, { x: 76, y: 0, z: 0 },
+    { x: 80, y: 0, z: 0 }, { x: 84, y: 0, z: 0 }, { x: 88, y: 0, z: 0 },
+    { x: 92, y: 0, z: 0 }, { x: 96, y: 0, z: 0 }, { x: 100, y: 0, z: 0 },
+
+];
+
+const stepPositions21 = [
+    { x: 33, y: 0.2, z: -2 }, { x: 34, y: 0.2, z: 3 }
+]
+const bigWallPosition21 = [{ x: 37, y: 2.5, z: 0 }];
+
+const stepPositions22 = [
+    { x: 74, y: 0.2, z: -2 }, { x: 75, y: 0.2, z: 3 }
+]
+const bigWallPosition22 = [{ x: 79, y: 2.5, z: 0 }];
+
+const APTPositions2 = [
+    { x: 13, y: 1.8, z: 0 }, { x: 15, y: 1.8, z: -3 }, { x: 20, y: 1.8, z: 2 },
+    { x: 50, y: 1.8, z: 2 }, { x: 76, y: 1.8, z: -4 }, { x: 84, y: 1.8, z: 3 }
+
+];
+const conePositions2 = [
+    { x: 6, y: 0.3, z: -1, },
+    { x: 10, y: 0.3, z: 4 },
+    { x: 50, y: 0.3, z: -4 },
+    { x: 58, y: 0.3, z: -4, scaleX: 2, scaleY: 2, scaleZ: 2 },
+    { x: 58, y: 0.3, z: -2, scaleX: 2, scaleY: 2, scaleZ: 2 },
+    { x: 58, y: 0.3, z: 0, scaleX: 2, scaleY: 2, scaleZ: 2 },
+    { x: 58, y: 0.3, z: 2, scaleX: 2, scaleY: 2, scaleZ: 2 },
+    { x: 58, y: 0.3, z: 4, scaleX: 2, scaleY: 2, scaleZ: 2 },
+
+];
+const wallPositions2 = [
+    { x: 54, y: 1.5, z: 4, scaleZ: 0.5, rotX: 0, rotY: Math.PI / 2, rotZ: 0 },
+    { x: 88, y: 1.5, z: 0 }
+];
+
+const rampPositions2 = [
+    { x: 62, y: 0.2, z: 3, }
+];
+const rampSizes2 = [{ length: 10, height: 5, width: 3 }]
+
+
+
+const floorPositions3 = [
+    { x: -12, y: 0, z: 0 }, { x: -8, y: 0, z: 0 },
+    { x: -4, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }, { x: 4, y: 0, z: 0 },
+    { x: 8, y: 0, z: 0 }, { x: 12, y: 0, z: 0 }, { x: 16, y: 0, z: 0 },
+    { x: 20, y: 0, z: 0 }, { x: 24, y: 0, z: 0 }, { x: 28, y: 0, z: 0 },
+    { x: 32, y: 0, z: 0 }, { x: 36, y: 0, z: 0 }, { x: 40, y: 0, z: 0 },
+    { x: 44, y: 0, z: 0 }, { x: 48, y: 0, z: 0 }, { x: 52, y: 0, z: 0 },
+    { x: 56, y: 0, z: 0 }, { x: 60, y: 0, z: 0 }, { x: 64, y: 0, z: 0 },
+    { x: 68, y: 0, z: 0 }, { x: 72, y: 0, z: 0 }, { x: 76, y: 0, z: 0 },
+    { x: 80, y: 0, z: 0 }, { x: 84, y: 0, z: 0 },
+    { x: 92, y: 0, z: 0 }, { x: 96, y: 0, z: 0 }, { x: 100, y: 0, z: 0 },
+
+
+    { x: 88, y: 0, z: -18 },
+];
+
+
+const stepPositions31 = [
+    { x: 16, y: 0.2, z: -2 }, { x: 17.5, y: 0.2, z: 3 },
+]
+const stepPositions32 = [
+    { x: 85, y: 2.95, z: 3 }, { x: 86.5, y: 2.95, z: -19 },
+]
+const bigWallPosition31 = [{ x: 20, y: 2.5, z: 0 }];
+const bigWallPosition32 = [{ x: 90, y: -2.5, z: 0 }];
+
+const APTPositions3 = [
+    { x: -3, y: 1.8, z: 2 }, { x: 6, y: 1.8, z: -3, scaleX: 2, scaleZ: 2, rotY: -Math.PI / 2 }, { x: 10, y: 1.8, z: 2 },
+    { x: 29, y: 1.8, z: 2 },
+    { x: 68, y: 1.8, z: 3, rotY: -Math.PI / 2 }, { x: 75, y: 1.8, z: -2, scaleX: 2, scaleZ: 2 },
+
+
+    // { x: 8, y: 1.8, z: -17 }, { x: 12, y: 1.8, z: -14 }
+];
+const conePositions3 = [
+    { x: -6, y: 0.28, z: 2 }, { x: -1, y: 0.28, z: -3 }, { x: 1, y: 0.28, z: -1 },
+    { x: 2, y: 0.28, z: 3 }, { x: 7, y: 0.28, z: 4 },
+    { x: 68, y: 0.28, z: 3 }, { x: 74, y: 0.28, z: 4 }, { x: 70, y: 0.28, z: -2 },
+];
+for (let i = 0; i < 10; i++) {
+    conePositions3.push({
+        x: 27 + Math.random() * 10,
+        y: 0.28, // Adjusted for smaller scale
+        z: -5 + Math.random() * 7
+    });
+}
+
+for (let i = 0; i < 16; i++) {
+    conePositions3.push({
+        x: 52 + Math.random() * 10,
+        y: 0.3, // Adjusted for smaller scale
+        z: -5 + Math.random() * 10,
+        scaleY: 2.0
+    });
+}
+
+const wallPositions3 = [
+    // { x: 35, y: 1.5, z: 1, scaleZ: 0.8 }, { x: 36, y: 1.5, z: 1, scaleZ: 0.8 },
+    // { x: 37, y: 1.5, z: 1, scaleZ: 0.8 }, { x: 38, y: 1.5, z: 1, scaleZ: 0.8 }, 
+    // { x: 47.5, y: 1.5, z: -15 }, { x: 48.5, y: 1.5, z: -15 }, { x: 49.5, y: 1.5, z: -15 },
+
+    { x: 83, y: 1.5, z: 0 }, { x: 84, y: 1.5, z: 0 }, { x: 85, y: 1.5, z: 0 },
+    { x: 86.5, y: 1.5, z: -18 },
+    { x: 87.5, y: 1.5, z: -18 }, { x: 88.5, y: 1.5, z: -18 },
+
+    { x: 93, y: 1.5, z: 0 }, { x: 95.5, y: 1.5, z: 0 },
+];
+const rampPositions3 = [{ x: 78, y: 0.25, z: 3 }];
+const rampSizes3 = [{ length: 4, height: 2, width: 3 }];
+
+
+
+function addChunkToGlobal(globalList, localList, globalStartX, startfloorX, endfloorX) {
+    localList.forEach(pos => {
+        // 원본 객체를 보호하기 위해 Spread(...)로 복사 후 x만 수정
+        globalList.push({
+            ...pos,
+            x: pos.x + globalStartX - startfloorX
+        });
+    });
+    return globalStartX + endfloorX - startfloorX;
+}
+
+const startfloorX1 = -20
+const endfloorX1 = 124;
+
+const startfloorX2 = -16
+const endfloorX2 = 100;
+
+const startfloorX3 = -12
+const endfloorX3 = 100;
+let nextX = -20;
+
+//###########################################################################
+addChunkToGlobal(floorPositions, floorPositions1, nextX, startfloorX1, endfloorX1);
+addChunkToGlobal(APTPositions, APTPositions1, nextX, startfloorX1, endfloorX1);
+
+
+const weatherZones1 = [
+    {
+        type: 'RAIN',
+        position: { x: 50 + nextX - startfloorX1, y: 5, z: 0 },
+        size: { x: 10, y: 10, z: 10 }
+    },
+    {
+        type: 'SNOW',
+        position: { x: 65 + nextX - startfloorX1, y: 5, z: 0 },
+        size: { x: 10, y: 10, z: 10 }
+    },
+    {
+        type: 'SNOW',
+        position: { x: 100 + nextX - startfloorX1, y: 5, z: 0 },
+        size: { x: 20, y: 10, z: 10 }
+    }
+];
+const trafficPositions1 = [{ x: 40 + nextX - startfloorX1, y: 0, z: 0 }];
+
+const globalStepPosition1 = [];
+const globalbigWallPosition1 = [];
+addChunkToGlobal(globalStepPosition1, stepPositions1, nextX, startfloorX1, endfloorX1);
+addChunkToGlobal(globalbigWallPosition1, bigWallPosition1, nextX, startfloorX1, endfloorX1);
+addChunkToGlobal(conePositions, conePositions1, nextX, startfloorX1, endfloorX1);
+addChunkToGlobal(wallPositions, wallPositions1, nextX, startfloorX1, endfloorX1);
+addChunkToGlobal(rampPositions, rampPositions1, nextX, startfloorX1, endfloorX1);
+nextX = addChunkToGlobal(invPositions, invPositions1, nextX, startfloorX1, endfloorX1) + 4;
+
+//###########################################################################
+
+addChunkToGlobal(floorPositions, floorPositions2, nextX, startfloorX2, endfloorX2);
+addChunkToGlobal(APTPositions, APTPositions2, nextX, startfloorX2, endfloorX2);
+
+
+const weatherZones2 = [
+    {
+        type: 'RAIN',
+        position: { x: 60 + nextX - startfloorX2, y: 5, z: 0 },
+        size: { x: 10, y: 10, z: 10 }
+    },
+
+];
+const trafficPositions2 = [{ x: -4 + nextX - startfloorX2, y: 0, z: 0 }];
+
+
+const globalStepPosition21 = [];
+const globalbigWallPosition21 = [];
+const globalStepPosition22 = [];
+const globalbigWallPosition22 = [];
+addChunkToGlobal(globalStepPosition21, stepPositions21, nextX, startfloorX2, endfloorX2);
+addChunkToGlobal(globalbigWallPosition21, bigWallPosition21, nextX, startfloorX2, endfloorX2);
+addChunkToGlobal(globalStepPosition22, stepPositions22, nextX, startfloorX2, endfloorX2);
+addChunkToGlobal(globalbigWallPosition22, bigWallPosition22, nextX, startfloorX2, endfloorX2);
+addChunkToGlobal(conePositions, conePositions2, nextX, startfloorX2, endfloorX2);
+addChunkToGlobal(wallPositions, wallPositions2, nextX, startfloorX2, endfloorX2);
+nextX = addChunkToGlobal(rampPositions, rampPositions2, nextX, startfloorX2, endfloorX2) + 4;
+
+//###########################################################################
+const trafficPositions3 = [{ x: 45 + nextX - startfloorX3, y: 0, z: 0 }];
+
+addChunkToGlobal(floorPositions, floorPositions3, nextX, startfloorX3, endfloorX3);
+addChunkToGlobal(APTPositions, APTPositions3, nextX, startfloorX3, endfloorX3);
+
+const weatherZones3 = [
+    {
+        type: 'RAIN',
+        position: { x: 34 + nextX - startfloorX3, y: 5, z: 0 },
+        size: { x: 10, y: 10, z: 10 }
+    },
+    {
+        type: 'SNOW',
+        position: { x: 57 + nextX - startfloorX3, y: 5, z: 0 },
+        size: { x: 10, y: 10, z: 10 }
+    }
+];
+
+const globalStepPosition31 = [];
+const globalbigWallPosition31 = [];
+const globalStepPosition32 = [];
+const globalbigWallPosition32 = [];
+addChunkToGlobal(globalStepPosition31, stepPositions31, nextX, startfloorX3, endfloorX3);
+addChunkToGlobal(globalbigWallPosition31, bigWallPosition31, nextX, startfloorX3, endfloorX3);
+addChunkToGlobal(globalStepPosition32, stepPositions32, nextX, startfloorX3, endfloorX3);
+addChunkToGlobal(globalbigWallPosition32, bigWallPosition32, nextX, startfloorX3, endfloorX3);
+addChunkToGlobal(conePositions, conePositions3, nextX, startfloorX3, endfloorX3);
+addChunkToGlobal(wallPositions, wallPositions3, nextX, startfloorX3, endfloorX3);
+nextX = addChunkToGlobal(rampPositions, rampPositions3, nextX, startfloorX3, endfloorX3) + 4;
+
+const rampSize = [...rampSize1, ...rampSizes2, ...rampSizes3];
+
+const trafficPositions = [...trafficPositions1, ...trafficPositions2, ...trafficPositions3];
+export const weatherZones = [...weatherZones1, ...weatherZones2, ...weatherZones3];
+
+floorPositions.push({x: nextX, y: 0 , z:0});
+
+floorPositions.push({x: nextX+4, y: 0 , z:0});
+const goalPosition = { x: nextX, y: 0.7, z: 0 };

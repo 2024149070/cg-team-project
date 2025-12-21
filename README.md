@@ -5,7 +5,7 @@
 
 [JH](https://2024149070.github.io/cg-team-project/JH/index.html)
 
-[HK](https://2024149070.github.io/cg-team-project/prototype_back_test_HK.html)
+[HK](https://2024149070.github.io/cg-team-project/HK/index.html)
 
 
 <br>

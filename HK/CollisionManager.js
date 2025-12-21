@@ -1,5 +1,4 @@
 
-
 // 모든 type에 대해 동일한 함수 호출을 할 수 있도록, 파라미터를 동일하게 가져감. 
 export const CollisionHandlers = {
     "floor": (player, object, isOrtho, isCollision) => {
@@ -32,7 +31,7 @@ export const CollisionHandlers = {
             object.userData.pressed = true;
         }
         if (object.userData.pressed && pair.userData.pressed) {
-            if (!targetWall.userData.raised) {
+            if (targetWall && !targetWall.userData.raised) {
                 targetWall.userData.raised = true;
                 targetWall.position.y += 1.8;
                 targetWall.updateMatrixWorld();
@@ -41,7 +40,7 @@ export const CollisionHandlers = {
         }
     },
     "goal": (player, object, isOrtho, isCollision) => {
-        if (isCollision) player.userData.finish();
+        if (isCollision && player.userData.finish) player.userData.finish();
     },
     "ramp": (player, object, isOrtho, isCollision) => {
         if (!isCollision) return;
@@ -59,10 +58,11 @@ export const CollisionHandlers = {
             player.position.y = targetY + (player.bbox.max.y - player.bbox.min.y) / 2;
 
             if (player.userData.land) {
-                player.userData.land(object);
+                player.userData.land(object, isOrtho);
             } else {
                 player.userData.isGrounded = true;
-                if (velocity.y < 0) velocity.y = 0;
+                // if (velocity.y < 0) velocity.y = 0; // velocity not accessible here directly unless passed or on player.velocity
+                if (player.velocity && player.velocity.y < 0) player.velocity.y = 0;
             }
             player.updateMatrixWorld();
             player.bbox.setFromObject(player);
@@ -120,7 +120,7 @@ function resolveCollision(playerMesh, objectMesh, isOrtho) {
 
     } else if (minOverlap === overlapY) {
         playerMesh.position.y += (playerMesh.position.y < objectMesh.position.y) ? -overlapY : overlapY;
-        playerMesh.userData.land(objectMesh);
+        if (playerMesh.userData.land) playerMesh.userData.land(objectMesh, isOrtho);
     } else if (minOverlap === overlapZ) {
         playerMesh.position.z += (playerMesh.position.z < objectMesh.position.z) ? -overlapZ : overlapZ;
     }

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Noto Sans KR', sans-serif, Arial;
+            /* 폰트 전체 적용 */
+        }
+
+        /* 팝업창 공통 디자인 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 300px;
+            padding: 30px 20px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .character-icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        .modal-content h2 {
+            font-size: 20px;
+            /* 제목 크기 약간 키움 */
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .result-desc {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        /* 버튼 공통 스타일 */
+        .modal-btn {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 10px 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #333;
+            transition: background-color 0.2s;
+        }
+
+        .modal-btn:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* 실패 버튼 강조 (선택사항) */
+        #retry-btn {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        #retry-btn:hover {
+            background-color: #fff0f0;
+        }
+
+        #timer-ui {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+
+            background-color: rgba(0, 0, 0, 0.6);
+            /* 반투명 검은 배경 */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 500;
+            /* 게임 화면보다 위에 */
+            font-family: 'Noto Sans KR', sans-serif, Arial;
+        }
+
+        /* 시간이 얼마 안 남았을 때 빨간색으로 변경할 클래스 */
+        .urgent {
+            color: #ff6b6b;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module" src="./main.js"></script>
+</head>
+
+<body>
+    <div id="timer-ui">남은 시간: <span id="time-left">30.0</span>초</div>
+
+    <div id="game-result-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="character-icon">🛵</div>
+            <h2 id="result-title">0초 만에 배달이 완료되었어요</h2>
+            <p class="result-desc">
+                주문하신 메뉴는 어떠셨어요?<br>
+                다른 분들을 위해 리뷰를 남겨보세요
+            </p>
+            <button id="confirm-btn" class="modal-btn">확인</button>
+        </div>
+    </div>
+
+    <div id="game-over-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="character-icon">💥</div>
+            <h2>배달에 실패했어요!</h2>
+            <p class="result-desc">
+                발을 헛디뎌 떨어졌습니다.<br>
+                다시 시도해보세요.
+            </p>
+            <button id="retry-btn" class="modal-btn">다시하기</button>
+        </div>
+    </div>
+
+    <div id="timeout-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="character-icon">⏰</div>
+            <h2>주문이 취소되었어요!</h2>
+            <p class="result-desc">
+                배달 시간이 30초를 초과하여<br>
+                고객님이 주문을 취소했습니다.
+            </p>
+            <button id="timeout-retry-btn" class="modal-btn">다시하기</button>
+        </div>
+    </div>
+</body>
+
+</html>
