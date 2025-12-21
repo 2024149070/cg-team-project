@@ -475,7 +475,7 @@ const bigWallPosition1 = [{ x: 80, y: 2.5, z: 0 }];
 
 const APTPositions1 = [
     { x: -2, y: 1.8, z: 0 }, { x: 6, y: 1.8, z: -3 }, { x: 10, y: 1.8, z: 2 },
-    { x: 25, y: 1.8, z: 2 }, { x: 56, y: 1.8, z: 2 },
+    { x: 25, y: 1.8, z: 2 }, { x: 44, y: 1.8, z: -4 }, { x: 56, y: 1.8, z: 2 },
 
     { x: 8, y: 1.8, z: -17 }, { x: 12, y: 1.8, z: -14 }
 ];
@@ -795,4 +795,5 @@ floorPositions.push({x: nextX, y: 0 , z:0});
 
 floorPositions.push({x: nextX+4, y: 0 , z:0});
 const goalPosition = { x: nextX, y: 0.7, z: 0 };
+
 
