@@ -94,6 +94,7 @@ export class Game {
             this.ui.startModal.style.display = 'none';
             this.isGameStarted = true;
             this.startTime = Date.now();
+            this.inputManager.enable();
         });
     }
 
