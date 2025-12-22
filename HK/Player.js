@@ -147,6 +147,11 @@ export class Player {
             this.momentumZ = this.updateMomentum(this.momentumZ, inputDirZ, accel, friction, maxSpeed);
             this.mesh.position.z += this.momentumZ;
             this.updateRotation(inputManager);
+        } else {
+            // Ortho mode: Force rotation to face front (Math.PI / 2)
+            const LERP_FACTOR = 0.1;
+            const ANGLE_CENTER = Math.PI / 2;
+            this.mesh.rotation.y += (ANGLE_CENTER - this.mesh.rotation.y) * LERP_FACTOR;
         }
 
         // Spawn particles if moving
