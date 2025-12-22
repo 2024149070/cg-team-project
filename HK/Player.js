@@ -14,6 +14,7 @@ export class Player {
         this.playerRadius = CONFIG.PHYSICS.PLAYER_RADIUS;
         this.bbox = new THREE.Box3();
         this.isFinished = false; // Flag for game completion
+        this.particles = []; // Array to store exhaust particles
     }
 
     setMesh(mesh) {
@@ -66,6 +67,8 @@ export class Player {
         if (this.mesh.position.y < -10) {
             return true; // isGameOver (Dead)
         }
+
+        this.updateParticles(); // Update exhaust particles
         return false;
     }
 
@@ -145,6 +148,14 @@ export class Player {
             this.mesh.position.z += this.momentumZ;
             this.updateRotation(inputManager);
         }
+
+        // Spawn particles if moving
+        if (inputDirX !== 0 || inputDirZ !== 0) {
+            // Spawn with some probability to avoid too many particles
+            if (Math.random() < 0.6) {
+                this.createParticle();
+            }
+        }
     }
 
     updateMomentum(currentMomentum, inputDir, accel, friction, maxSpeed) {
@@ -214,6 +225,85 @@ export class Player {
             if (CollisionHandlers[type]) {
                 CollisionHandlers[type](this.mesh, object, isOrtho, isCollision);
             }
+        }
+    }
+
+    createParticle() {
+        // Smaller cube size
+        const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+        const material = new THREE.MeshBasicMaterial({
+            color: 0x888888,
+            transparent: true,
+            opacity: 0.8
+        });
+        const particle = new THREE.Mesh(geometry, material);
+
+        // Position: Behind and Below
+        // 1. Start at player center
+        const spawnPos = this.mesh.position.clone();
+
+        // 2. Move "Below" (Player center is around y=1.5, feet at 0. So -1.0 to get near feet)
+        spawnPos.y -= 0.3; // Lower it significantly
+
+        // 3. Move "Behind"
+        // Calculate backward vector based on player rotation
+        // Assuming Local +Z is forward (based on updateRotation logic)
+        const backward = new THREE.Vector3(0, 0, -1);
+        backward.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.mesh.rotation.y);
+        backward.multiplyScalar(0.4); // 0.4 units behind
+
+        spawnPos.add(backward);
+
+        // 4. Add slight randomness
+        const randomOffset = new THREE.Vector3(
+            (Math.random() - 0.5) * 0.2,
+            (Math.random() - 0.5) * 0.2,
+            (Math.random() - 0.5) * 0.2
+        );
+        spawnPos.add(randomOffset);
+
+        particle.position.copy(spawnPos);
+
+        // Random rotation
+        particle.rotation.set(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI
+        );
+
+        this.scene.add(particle);
+
+        this.particles.push({
+            mesh: particle,
+            life: 1.0, // Lifetime in seconds
+            velocity: new THREE.Vector3(
+                (Math.random() - 0.5) * 0.02, // Reduced drift speed
+                Math.random() * 0.02,
+                (Math.random() - 0.5) * 0.02
+            )
+        });
+    }
+
+    updateParticles() {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.life -= 0.016; // Approx 60fps
+
+            if (p.life <= 0) {
+                this.scene.remove(p.mesh);
+                p.mesh.geometry.dispose();
+                p.mesh.material.dispose();
+                this.particles.splice(i, 1);
+                continue;
+            }
+
+            p.mesh.position.add(p.velocity);
+            p.mesh.rotation.x += 0.1;
+            p.mesh.rotation.y += 0.1;
+
+            p.mesh.material.opacity = p.life * 0.8;
+            const scale = p.life;
+            p.mesh.scale.set(scale, scale, scale);
         }
     }
 }
