@@ -39,11 +39,11 @@ export async function initMap(loader, scene, colliders) {
 
     await createGoal(loader, scene, goalPosition, colliders);
 
-    createWall(scene, wallPositions, colliders);
+    await createWall(scene, wallPositions, colliders);
 
-    createRamp(scene, [rampPositions[0]], rampSize[0], colliders);
-    createRamp(scene, [rampPositions[1]], rampSize[1], colliders);
-    createRamp(scene, [rampPositions[2]], rampSize[2], colliders);
+    await createRamp(scene, [rampPositions[0]], rampSize[0], colliders);
+    await createRamp(scene, [rampPositions[1]], rampSize[1], colliders);
+    await createRamp(scene, [rampPositions[2]], rampSize[2], colliders);
 
     createInv(scene, invPositions, colliders);
 
@@ -286,9 +286,19 @@ async function createCones(loader, scene, positions, collider) {
 const wallPositions = [
 ];
 
-function createWall(scene, positions, colliders) {
+async function createWall(scene, positions, colliders) {
     const wallGeometry = new THREE.BoxGeometry(1, 3, 10);
-    const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xa8b2d2b });
+    const textureLoader = new THREE.TextureLoader();
+    const texture = await textureLoader.loadAsync('../assets/plaster.jpg');
+    const normalTexture = await textureLoader.loadAsync('../assets/plaster-normal.jpg');
+
+    const wallMaterial = new THREE.MeshStandardMaterial({
+        map: texture,
+        normalMap: normalTexture,
+        color: 0xCCCCCC,
+        roughness: 0.07,
+        metalness: 0.1
+    });
 
     positions.forEach(pos => {
         const wall = new THREE.Mesh(wallGeometry, wallMaterial);
@@ -319,7 +329,7 @@ function createWall(scene, positions, colliders) {
 
 // 경사로 생성.
 const rampPositions = [];
-function createRamp(scene, positions, size, colliders) {
+async function createRamp(scene, positions, size, colliders) {
     // size = { length: X축 길이, height: Y축 높이, width: Z축 폭 }
     const { length, height, width } = size;
 
@@ -344,7 +354,23 @@ function createRamp(scene, positions, size, colliders) {
     // 편의를 위해 Z축 중심을 맞춰줍니다.
     geometry.translate(0, 0, -width / 2);
 
-    const material = new THREE.MeshStandardMaterial({ color: 0xcccccc });
+    const textureLoader = new THREE.TextureLoader();
+    const texture = await textureLoader.loadAsync('../assets/ramp.png');
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+
+    // Rotate 90 degrees
+    texture.center.set(0.5, 0.5);
+    texture.rotation = Math.PI / 2 * 3;
+
+    // Zoom in (fewer repeats = larger texture features)
+    texture.repeat.set(0.35, 0.35);
+
+    const material = new THREE.MeshStandardMaterial({
+        map: texture,
+        roughness: 0.8,
+        metalness: 0.2
+    });
     positions.forEach(pos => {
         const ramp = new THREE.Mesh(geometry, material);
         ramp.position.set(pos.x, pos.y, pos.z);
