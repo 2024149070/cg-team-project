@@ -25,7 +25,7 @@ export const CONFIG = {
         }
     },
     GAME: {
-        TIME_LIMIT: 180
+        TIME_LIMIT: 300
     },
     COLORS: {
         SKY: new THREE.Color(0xb8f8fd),
