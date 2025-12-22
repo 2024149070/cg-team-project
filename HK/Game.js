@@ -70,6 +70,7 @@ export class Game {
                 return;
             }
             if (event.key === 'Tab') {
+                if (!this.isGameStarted) return;
                 event.preventDefault();
                 this.cameraManager.switchCamera();
             }
