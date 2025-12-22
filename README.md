@@ -1,3 +1,6 @@
+## URL for Play
+[PLAY](https://2024149070.github.io/cg-team-project/HK/index.html)
+
 ## Legal Notice & Attribution
 
 This project is a non-commercial personal project developed for educational purposes.
