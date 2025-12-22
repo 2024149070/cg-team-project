@@ -1,5 +1,6 @@
 export class InputManager {
     constructor() {
+        this.enabled = false;
         this.keys = {
             up: false,
             down: false,
@@ -15,7 +16,17 @@ export class InputManager {
         window.addEventListener('keyup', this.onKeyUp);
     }
 
+    enable() {
+        this.enabled = true;
+    }
+
+    disable() {
+        this.enabled = false;
+        Object.keys(this.keys).forEach(key => this.keys[key] = false);
+    }
+
     onKeyDown(event) {
+        if (!this.enabled) return;
         if (event.key === 'ArrowUp') this.keys.up = true;
         if (event.key === 'ArrowDown') this.keys.down = true;
         if (event.key === 'ArrowLeft') this.keys.left = true;
@@ -24,6 +35,7 @@ export class InputManager {
     }
 
     onKeyUp(event) {
+        if (!this.enabled) return;
         if (event.key === 'ArrowUp') this.keys.up = false;
         if (event.key === 'ArrowDown') this.keys.down = false;
         if (event.key === 'ArrowLeft') this.keys.left = false;
