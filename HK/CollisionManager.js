@@ -99,6 +99,30 @@ export const CollisionHandlers = {
             resolveCollision(player, object, isOrtho);
 
         }
+    },
+    "sinkHole":(player, object, isOrtho, isCollision) =>  {
+        if(object.userData.fell){
+            return;
+        }
+        if (player.position.x >= object.position.x-7 && !object.userData.time) {
+            object.userData.originalY = object.position.y;
+            object.userData.time = performance.now()
+        }
+        if (object.userData.keep == true){
+            if(isCollision) resolveCollision(player,object,isOrtho);
+        }
+        else if (object.userData.time){
+            const t = (performance.now() - object.userData.time)/700;
+            if(t>=1){
+                object.position.y = -1000;
+                object.updateMatrixWorld();
+                object.bbox.setFromObject(object);
+                object.userData.fell = true;
+                return;
+            }
+            const shakeOffset = Math.sin(t * Math.PI * 10) * 0.1 * (1 - t);
+            object.position.y = object.userData.originalY + shakeOffset;
+        }
     }
 }
 

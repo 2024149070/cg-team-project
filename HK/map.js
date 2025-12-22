@@ -47,6 +47,8 @@ export async function initMap(loader, scene, colliders) {
 
     createInv(scene, invPositions, colliders);
 
+    createSinkHole(scene, sinkHolePositions, sinkHoleKeepIndices, colliders);
+
     // Initialize Weather Visuals (Clouds, SnowFloor) - Integrated from old map.js
     weatherZones.forEach(zone => {
         // Create Cloud for all weather zones
@@ -342,7 +344,7 @@ function createRamp(scene, positions, size, colliders) {
     // 편의를 위해 Z축 중심을 맞춰줍니다.
     geometry.translate(0, 0, -width / 2);
 
-    const material = new THREE.MeshStandardMaterial({ color: 0x88ccff });
+    const material = new THREE.MeshStandardMaterial({ color: 0xcccccc });
     positions.forEach(pos => {
         const ramp = new THREE.Mesh(geometry, material);
         ramp.position.set(pos.x, pos.y, pos.z);
@@ -438,6 +440,38 @@ function createInv(scene, position, colliders) {
 
 }
 
+const sinkHoleKeepIndices = [0, 8, 12, 17, 23, 27, 30, 33, 38];
+const sinkHolePositions = [];
+
+
+
+
+
+
+function createSinkHole(scene, positions, keepIndices, colliders) {
+    const sinkHoleGeometry = new THREE.BoxGeometry(1, 0.5, 1);
+    const sinkHoleMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
+    positions.forEach((pos,index) => {
+        const sinkHole = new THREE.Mesh(sinkHoleGeometry, sinkHoleMaterial);
+        sinkHole.position.set(pos.x, pos.y, pos.z);
+        sinkHole.geometry.computeBoundingBox();
+        sinkHole.bbox = new THREE.Box3().setFromObject(sinkHole);
+        sinkHole.userData.type = "sinkHole";
+        sinkHole.userData.fell = false;
+        if(keepIndices.includes(index)){
+            sinkHole.userData.keep = true; 
+        }
+        else{
+            sinkHole.userData.kepp = false;
+        }
+        colliders.push(sinkHole);
+        scene.add(sinkHole);
+    });
+
+}
+
+
+//###############################################################################
 const floorPositions1 = [
     { x: -20, y: 0, z: 0 },
     { x: -16, y: 0, z: 0 }, { x: -12, y: 0, z: 0 }, { x: -8, y: 0, z: 0 },
@@ -603,6 +637,7 @@ const rampPositions2 = [
 ];
 const rampSizes2 = [{ length: 10, height: 5, width: 3 }]
 
+const invPositions2 = [{x:79, y:0, z:6}];
 
 
 const floorPositions3 = [
@@ -758,6 +793,7 @@ addChunkToGlobal(globalStepPosition22, stepPositions22, nextX, startfloorX2, end
 addChunkToGlobal(globalbigWallPosition22, bigWallPosition22, nextX, startfloorX2, endfloorX2);
 addChunkToGlobal(conePositions, conePositions2, nextX, startfloorX2, endfloorX2);
 addChunkToGlobal(wallPositions, wallPositions2, nextX, startfloorX2, endfloorX2);
+addChunkToGlobal(invPositions, invPositions2, nextX, startfloorX2, endfloorX2)
 nextX = addChunkToGlobal(rampPositions, rampPositions2, nextX, startfloorX2, endfloorX2) + 4;
 
 //###########################################################################
@@ -796,9 +832,26 @@ const rampSize = [...rampSize1, ...rampSizes2, ...rampSizes3];
 const trafficPositions = [...trafficPositions1, ...trafficPositions2, ...trafficPositions3];
 export const weatherZones = [...weatherZones1, ...weatherZones2, ...weatherZones3];
 
-floorPositions.push({x: nextX, y: 0 , z:0});
 
-floorPositions.push({x: nextX+4, y: 0 , z:0});
+
+
+
+
+const startX = nextX-1; // 시작 X 좌표
+const endX = nextX + 5;   // 끝 X 좌표
+nextX = nextX + 8;
+const startZ = -3; // 시작 Z 좌표
+const endZ = 3;    // 끝 Z 좌표
+
+for (let x = startX; x <= endX; x++) {
+    for (let z = startZ; z <= endZ; z++) {
+        sinkHolePositions.push({ x: x, y: 0, z: z });
+    }
+}
+
+floorPositions.push({ x: nextX, y: 0, z: 0 });
+
+floorPositions.push({ x: nextX + 4, y: 0, z: 0 });
 const goalPosition = { x: nextX, y: 0.7, z: 0 };
 
 
